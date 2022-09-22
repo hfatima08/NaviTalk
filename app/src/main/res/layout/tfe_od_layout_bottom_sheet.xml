@@ -1,0 +1,94 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/bottom_sheet_layout"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:layout_gravity="center_horizontal"
+    android:background="@drawable/bottom_sheet_bg"
+    android:gravity="center_horizontal"
+    android:orientation="vertical"
+    android:padding="8dp"
+    app:behavior_hideable="true"
+    app:layout_behavior="com.google.android.material.bottomsheet.BottomSheetBehavior">
+
+    <LinearLayout
+        android:id="@+id/gesture_layout"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:paddingTop="10dp"
+        android:paddingBottom="20dp">
+
+        <ImageView
+            android:id="@+id/bottom_sheet_arrow"
+            android:layout_width="600dp"
+            android:layout_height="40dp"
+            android:layout_gravity="center"
+            android:src="@drawable/arrow_up" />
+    </LinearLayout>
+
+
+    <TextView
+        android:id="@+id/code"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Code"
+        android:layout_margin="10dp"
+        android:textAlignment="center"
+        android:textColor="@color/black"
+        android:textSize="18sp"/>
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="10px"
+        android:layout_marginTop="2dp"
+        android:background="@android:color/darker_gray" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/vol"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="VOLUNTEERS"
+            android:textAlignment="center"
+            android:textColor="#F8010630"
+            android:textSize="18sp"
+            android:layout_marginTop="10dp"
+            android:textStyle="bold"
+            />
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/list"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent">
+
+        </androidx.recyclerview.widget.RecyclerView>
+
+        <Button
+            android:id="@+id/btn_call"
+            android:layout_width="320dp"
+            android:layout_height="55dp"
+            android:backgroundTint="@color/colorpurple"
+            android:drawableLeft="@drawable/ic_baseline_logout_24"
+            android:layout_gravity="center_horizontal"
+            android:text="Logout"
+            android:layout_margin="10dp"
+            android:textColor="#FAFAFD"
+            />
+
+
+    </LinearLayout>
+
+
+</LinearLayout>

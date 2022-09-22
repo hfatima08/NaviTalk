@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@color/colorblack"
+    tools:context=".CameraScreen">
+
+    <androidx.camera.view.PreviewView
+        android:id="@+id/previewView"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="90" />
+
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+    <Button
+        android:id="@+id/btn_call"
+        android:layout_width="320dp"
+        android:layout_height="55dp"
+        android:layout_below="@+id/previewView"
+        android:backgroundTint="@color/colorpurple"
+        android:drawableLeft="@drawable/ic_baseline_video_call_24"
+        android:layout_gravity="center_vertical"
+        android:text="Call a Volunteer"
+        android:layout_marginLeft="7dp"
+        android:textColor="@color/white"
+        />
+
+        <com.google.android.material.floatingactionbutton.FloatingActionButton
+            android:id="@+id/btn_logout"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="bottom|right"
+            android:src="@drawable/ic_baseline_logout_24"
+            app:layout_anchor="@id/previewView"
+            android:layout_marginLeft="10dp"
+            android:layout_marginBottom="6dp"
+            android:layout_marginTop="6dp"
+            android:backgroundTint="@color/white"
+            app:layout_anchorGravity="bottom|right|end" />
+
+    </LinearLayout>
+
+</LinearLayout>

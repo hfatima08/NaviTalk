@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout
+    xmlns:android="http://schemas.android.com/apk/res/android" android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="15dp"
+        android:backgroundTint="@color/white"
+        android:orientation="vertical">
+
+        <View
+            android:id="@+id/l2"
+            android:layout_width="350dp"
+            android:layout_height="1dp"
+            android:layout_gravity="center"
+            android:background="#DCDCDC" />
+
+        <TextView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:text="'Enter the person's code you are going to volunteer'"
+            android:layout_alignParentBottom="true"
+            android:gravity="center_horizontal"
+            android:layout_gravity="center"
+            android:layout_marginTop="10dp"
+            android:textColor="#454545"
+
+            android:textSize="17sp"  />
+
+        <com.google.android.material.textfield.TextInputLayout
+            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
+            android:layout_width="250dp"
+            android:layout_height="80dp"
+            android:layout_marginTop="10dp"
+            android:layout_gravity="center_horizontal"
+            android:hint="Code"
+            >
+            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/code"
+                android:layout_width="250dp"
+                android:layout_height="55dp"
+                />
+        </com.google.android.material.textfield.TextInputLayout>
+
+        <Button
+            android:id="@+id/submit"
+            android:layout_width="150dp"
+            android:layout_height="55dp"
+            android:layout_below="@+id/txt"
+            android:backgroundTint="@color/colorpurple"
+            android:layout_gravity="center_horizontal"
+            android:text="Submit"
+            android:textAlignment="center"
+            android:textColor="@color/white"
+            />
+    </LinearLayout>
+
+</RelativeLayout>
