@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -28,8 +29,9 @@ import java.util.ArrayList;
 
 public class HomeFragment extends Fragment {
     ImageView img;
+    TextView volname;
     DatabaseReference ref;
-    String userid;
+    String userid,username;
     ArrayList<String> vol_list = new ArrayList<String>();
     public HomeFragment() {
         // Required empty public constructor
@@ -43,9 +45,79 @@ public class HomeFragment extends Fragment {
         View view= inflater.inflate(R.layout.fragment_home, container, false);
 
         userid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        ref= FirebaseDatabase.getInstance().getReference().child("Users");
-        img=view.findViewById(R.id.img);
+        username = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+        ref = FirebaseDatabase.getInstance().getReference().child("Users");
+        img = view.findViewById(R.id.img);
+        img = view.findViewById(R.id.img);
+        volname = view.findViewById(R.id.vol_name);
 
+        //set vol name
+        volname.setText("Hey "+username+"!");
+
+        startAnimation();
+
+        new Handler().postDelayed(new Runnable() {
+            @Override
+            public void run() {
+                ReceiveCall();
+            }
+        }, 4000);
+
+        return view;
+    }
+
+    public void ReceiveCall() {
+
+        ref.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot snapshot) {
+                if (snapshot.child(userid).hasChild("Ringing")) {
+
+                    Query refer = ref.orderByChild("Calling");
+                    refer.addChildEventListener(new ChildEventListener() {
+                        @Override
+                        public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+                            String Bid = snapshot.getKey();
+
+                                Intent intent = new Intent(getContext(), ConnectingActivity2.class);
+                                intent.putExtra("BId", Bid);
+                                startActivity(intent);
+                            }
+
+
+                        @Override
+                        public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                        }
+
+                        @Override
+                        public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+
+                        }
+
+                        @Override
+                        public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                    //end
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError error) {
+
+            }
+        });
+    }
+
+
+    private void startAnimation() {
         Animation zoomin =new TranslateAnimation(1, 1, 0, -50);
         zoomin.setDuration(1000);
         zoomin.setFillEnabled(true);
@@ -99,67 +171,7 @@ public class HomeFragment extends Fragment {
 
 
             }
-            
-        });
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                ReceiveCall();
-            }
-        }, 4000);
-
-        return view;
-    }
-
-
-    public void ReceiveCall() {
-
-        ref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.child(userid).hasChild("Ringing")) {
-
-                    Query refer = ref.orderByChild("Calling");
-                    refer.addChildEventListener(new ChildEventListener() {
-                        @Override
-                        public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                            String Bid = snapshot.getKey();
-
-                                Intent intent = new Intent(getContext(), ConnectingActivity2.class);
-                                intent.putExtra("BId", Bid);
-                                startActivity(intent);
-                            }
-
-
-                        @Override
-                        public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                        }
-
-                        @Override
-                        public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-                        }
-
-                        @Override
-                        public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-                    //end
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
         });
     }
 }

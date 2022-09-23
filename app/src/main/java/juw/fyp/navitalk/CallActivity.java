@@ -91,8 +91,7 @@ public class CallActivity extends AppCompatActivity
                             ref.child(volId).child("Ringing").removeValue();
                             ref.child(userId).child("Calling").removeValue();
 
-
-                                session.unpublish(publisher);
+                            session.unpublish(publisher);
 
                             startActivity(new Intent(getApplicationContext(), DetectorActivity.class));
                             finish();
