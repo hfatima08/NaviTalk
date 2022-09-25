@@ -318,7 +318,7 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
                  users.setRole("Volunteer");
              }else{
                 users.setRole("Blind User");
-                String code = getRandom();
+                Long code = getRandom();
                 users.setCode(code);}
     }
 
@@ -338,14 +338,14 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
     //Google Signin End
 
     //random number
-    public String getRandom() {
+    public Long getRandom() {
         // It will generate 6 digit random Number.
         // from 0 to 999999
         Random rnd = new Random();
         int number = rnd.nextInt(999999);
 
         // this will convert any number sequence into 6 character.
-        return String.format("%06d", number);
+        return Long.parseLong(String.format("%06d", number));
     }
 
     private void SignOut(){
@@ -366,13 +366,13 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
         rootRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                String roled=dataSnapshot.getValue(String.class);
-                if(roled.equals("Volunteer") && str.equals("volunteer")){
+                Boolean role = dataSnapshot.getValue().toString().contains("Blind User");
+                if(role.equals(false) && str.equals("volunteer")){
                   VolunteerActivity();
-                }else if(roled.equals("Blind User") && str.equals("blind")){
+                }else if(role.equals(true) && str.equals("blind")){
                     BlindActivity();
                 }else{
-                    Toast.makeText(LoginScreen.this, "This User is already registered as a "+roled, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(LoginScreen.this, "This User is already registered as a "+str+"!", Toast.LENGTH_SHORT).show();
                     SignOut();
                 }
             }
@@ -397,58 +397,28 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                String num = code.getText().toString();
+                Long num = Long.parseLong(code.getText().toString());
                 DatabaseReference ref=FirebaseDatabase.getInstance().getReference().child("Users");
-                Query refer = ref.orderByChild("code");
-                refer.addChildEventListener(new ChildEventListener() {
+                ref.orderByChild("code").equalTo(num).addValueEventListener(new ValueEventListener() {
                     @Override
-                    public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                            String id = snapshot.getKey();
-
-                            DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference("Users/" + id + "/role");
-
-                            rootRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                @Override
-                                public void onDataChange(DataSnapshot dataSnapshot) {
-                                    String roled = dataSnapshot.getValue(String.class);
-                                    if (roled.equals("Blind User")) {
-                                        users.setCode(num);
-                                        database.getReference().child("Users").child(user.getUid()).setValue(users);
-                                        OpenActivity();
-                                    }
-
+                    public void onDataChange(DataSnapshot dataSnapshot) {
+                        if (dataSnapshot.exists()) {
+                                Boolean role = dataSnapshot.getValue().toString().contains("Blind User");
+                                 if (role.equals(true)) {
+                                            users.setCode(num);
+                                            database.getReference().child("Users").child(user.getUid()).setValue(users);
+                                            OpenActivity();
+                                        }
                                 }
-
-                                @Override
-                                public void onCancelled(DatabaseError databaseError) {
-                                    Toast.makeText(getApplicationContext(), "Invalid Code", Toast.LENGTH_SHORT).show();
-                                }
-                            });
+                        else {
+                            Toast.makeText(getApplicationContext(), "ERROR: Invalid Code! ", Toast.LENGTH_SHORT).show();
+                        }
                     }
-
-                    @Override
-                    public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                    }
-
-                    @Override
-                    public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-                        Toast.makeText(getApplicationContext(), "Invalid Code", Toast.LENGTH_SHORT).show();
-                    }
-
-                    @Override
-                    public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                        Toast.makeText(getApplicationContext(), "Invalid Code", Toast.LENGTH_SHORT).show();
-                    }
-
-
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-                        Toast.makeText(getApplicationContext(), "Invalid Code", Toast.LENGTH_SHORT).show();
+
                     }
                 });
-
             }
         });
 

@@ -1,12 +1,16 @@
 package juw.fyp.navitalk;
 
+import android.content.ActivityNotFoundException;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.text.SpannableString;
+import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -26,7 +30,7 @@ public class SettingsFragment extends Fragment {
     GoogleSignInClient signInClient;
     GoogleSignInOptions signInOptions;
     FirebaseAuth auth;
-
+    TextView profile,fb,insta;
     public SettingsFragment() {
         // Required empty public constructor
     }
@@ -38,13 +42,43 @@ public class SettingsFragment extends Fragment {
         // Inflate the layout for this fragment
         View view= inflater.inflate(R.layout.fragment_settings, container, false);
 
-        TextView textView= (TextView) view.findViewById(R.id.EditProfile);
+        profile = view.findViewById(R.id.EditProfile);
         logout = view.findViewById(R.id.btn_logout);
+        fb = view.findViewById(R.id.fb);
+        insta = view.findViewById(R.id.insta);
 
         auth = FirebaseAuth.getInstance();
 
         signInOptions= new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
         signInClient = GoogleSignIn.getClient(getContext(),signInOptions);
+
+
+        SpannableString content = new SpannableString(profile.getText());
+        content.setSpan(new UnderlineSpan(), 0, profile.getText().length(), 0);
+        profile.setText(content);
+
+        fb.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String appLink="fb://page/237564710351658";
+                String webLink="https://www.facebook.com/NaviTalk-101457775805953/";
+                String appPackage="com.facebook.katana ";
+
+                openLink(appLink,appPackage,webLink);
+                
+            }
+        });
+
+        insta.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                String appLink="https://instagram.com/navi_talk?igshid=YmMyMTA2M2Y=";
+                String appPackage="com.instagram.android ";
+
+                openLink(appLink,appPackage,appLink);
+
+            }
+        });
 
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -53,7 +87,7 @@ public class SettingsFragment extends Fragment {
             }
         });
 
-        textView.setOnClickListener(new View.OnClickListener() {
+        profile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 FragmentTransaction transaction= getActivity().getSupportFragmentManager().beginTransaction();
@@ -65,6 +99,23 @@ public class SettingsFragment extends Fragment {
         });
 
         return view;
+    }
+
+    private void openLink(String appLink, String appPackage, String webLink) {
+        try{
+            Uri uri = Uri.parse(appLink);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(uri);
+            intent.setPackage(appPackage);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        } catch (ActivityNotFoundException activityNotFoundException){
+            Uri uri = Uri.parse(webLink);
+            Intent intent = new Intent(Intent.ACTION_VIEW);
+            intent.setData(uri);
+            intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            startActivity(intent);
+        }
     }
 
     private void SignOut() {

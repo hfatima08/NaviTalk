@@ -5,15 +5,15 @@ public class Users {
     private String UserName;
     private String mail;
     private String Role;
-    private String code;
+    private Long code;
 
     public Users(){}
 
-    public String getCode() {
+    public Long getCode() {
         return code;
     }
 
-    public void setCode(String code) {
+    public void setCode(Long code) {
         this.code = code;
     }
 

@@ -33,27 +33,12 @@
             android:layout_width="350dp"
             android:layout_height="90dp"
             app:startIconDrawable="@drawable/ic_baseline_account_circle_24"
-            android:hint="First Name"
+            android:hint="User Name"
             app:helperText="Required*"
             app:helperTextTextColor="#C30505"
             >
             <com.google.android.material.textfield.TextInputEditText
-                android:layout_width="350dp"
-                android:layout_height="55dp"
-                />
-        </com.google.android.material.textfield.TextInputLayout>
-
-        <com.google.android.material.textfield.TextInputLayout
-            style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="350dp"
-            android:layout_height="90dp"
-            app:startIconDrawable="@drawable/ic_baseline_account_circle_24"
-            android:hint="Last Name"
-            app:helperText="Required*"
-            app:helperTextTextColor="#C30505"
-            android:layout_marginTop="10dp"
-            >
-            <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/usernameTF"
                 android:layout_width="350dp"
                 android:layout_height="55dp"
                 />
@@ -68,8 +53,10 @@
         app:helperText="Required*"
         app:helperTextTextColor="#C30505"
         android:layout_marginTop="10dp"
+        android:enabled="false"
         >
         <com.google.android.material.textfield.TextInputEditText
+            android:id="@+id/emailTF"
             android:layout_width="350dp"
             android:layout_height="55dp"
             />
@@ -79,21 +66,21 @@
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
             android:layout_width="350dp"
             android:layout_height="90dp"
-            app:startIconDrawable="@drawable/ic_baseline_phone_24"
-            android:hint="Phone Number"
-            app:helperText="Required*"
-            app:helperTextTextColor="#C30505"
+            app:startIconDrawable="@drawable/code"
+            android:hint="Assistance Code"
             android:layout_marginTop="10dp"
+            android:enabled="false"
             >
             <com.google.android.material.textfield.TextInputEditText
+                android:id="@+id/codeTF"
                 android:layout_width="350dp"
                 android:layout_height="55dp"
-                android:inputType="phone"
-
+                android:inputType="numberDecimal"
                 />
         </com.google.android.material.textfield.TextInputLayout>
 
         <Button
+            android:id="@+id/update"
             android:layout_width="350dp"
             android:layout_height="60dp"
             android:layout_marginTop="50dp"
@@ -102,7 +89,7 @@
             android:layout_gravity="center_horizontal"
             android:text="Update Profile"
             android:textColor="@color/white"
-            android:layout_below="@id/imageshare"/>
+           />
     </LinearLayout>
 
 </LinearLayout>

@@ -27,11 +27,13 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 
+import juw.fyp.navitalk.models.Users;
+
 public class HomeFragment extends Fragment {
     ImageView img;
-    TextView volname;
+    TextView volName;
     DatabaseReference ref;
-    String userid,username;
+    String userId,userName;
     ArrayList<String> vol_list = new ArrayList<String>();
     public HomeFragment() {
         // Required empty public constructor
@@ -44,15 +46,14 @@ public class HomeFragment extends Fragment {
         // Inflate the layout for this fragment
         View view= inflater.inflate(R.layout.fragment_home, container, false);
 
-        userid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-        username = FirebaseAuth.getInstance().getCurrentUser().getDisplayName();
+        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
         ref = FirebaseDatabase.getInstance().getReference().child("Users");
         img = view.findViewById(R.id.img);
         img = view.findViewById(R.id.img);
-        volname = view.findViewById(R.id.vol_name);
+        volName = view.findViewById(R.id.vol_name);
 
-        //set vol name
-        volname.setText("Hey "+username+"!");
+       getUsername();
 
         startAnimation();
 
@@ -66,12 +67,32 @@ public class HomeFragment extends Fragment {
         return view;
     }
 
+    private void getUsername() {
+            DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users/"+userId);
+            reference.addListenerForSingleValueEvent(new ValueEventListener() {
+                @Override
+                public void onDataChange(DataSnapshot dataSnapshot) {
+                    Users users = dataSnapshot.getValue(Users.class);
+                    userName = users.getUserName();
+                    volName.setText("Hey "+userName+"!");
+
+                }
+
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+
+                }
+            });
+
+    }
+
     public void ReceiveCall() {
 
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.child(userid).hasChild("Ringing")) {
+                if (snapshot.child(userId).hasChild("Ringing")) {
 
                     Query refer = ref.orderByChild("Calling");
                     refer.addChildEventListener(new ChildEventListener() {
