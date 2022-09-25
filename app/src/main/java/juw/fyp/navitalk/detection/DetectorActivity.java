@@ -16,7 +16,6 @@
 
 package juw.fyp.navitalk.detection;
 
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.Canvas;
@@ -28,9 +27,9 @@ import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.media.ImageReader.OnImageAvailableListener;
 import android.os.SystemClock;
+import android.speech.tts.TextToSpeech;
 import android.util.Size;
 import android.util.TypedValue;
-import android.widget.CompoundButton;
 import android.widget.Toast;
 
 import juw.fyp.navitalk.R;
@@ -61,30 +60,23 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
   private static final String TF_OD_API_LABELS_FILE = "labelmap.txt";
   private static final DetectorMode MODE = DetectorMode.TF_OD_API;
   // Minimum detection confidence to track a detection.
-  private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.5f;
+  private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.65f;
   private static final boolean MAINTAIN_ASPECT = false;
   private static final Size DESIRED_PREVIEW_SIZE = new Size(640, 480);
   private static final boolean SAVE_PREVIEW_BITMAP = false;
   private static final float TEXT_SIZE_DIP = 10;
   OverlayView trackingOverlay;
   private Integer sensorOrientation;
-
   private Detector detector;
-
   private long lastProcessingTimeMs;
   private Bitmap rgbFrameBitmap = null;
   private Bitmap croppedBitmap = null;
   private Bitmap cropCopyBitmap = null;
-
   private boolean computingDetection = false;
-
   private long timestamp = 0;
-
   private Matrix frameToCropTransform;
   private Matrix cropToFrameTransform;
-
   private MultiBoxTracker tracker;
-
   private BorderedText borderedText;
 
 
@@ -155,7 +147,7 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
   }
 
   @Override
-  protected void processImage() {
+  protected void processImage(String obj) {
     ++timestamp;
     final long currTimestamp = timestamp;
     trackingOverlay.postInvalidate();
@@ -207,14 +199,16 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
 
             for (final Detector.Recognition result : results) {
               final RectF location = result.getLocation();
-              if (location != null && result.getConfidence() >= minimumConfidence) {
+              if (location != null && result.getConfidence() >= minimumConfidence && result.getTitle().equals(obj)) {
                 canvas.drawRect(location, paint);
-
                 cropToFrameTransform.mapRect(location);
 
                 result.setLocation(location);
                 mappedRecognitions.add(result);
+                t1.speak(result.getTitle()+"Detected", TextToSpeech.QUEUE_FLUSH, null);
+             //   t1.stop();
               }
+
             }
 
             tracker.trackResults(mappedRecognitions, currTimestamp);

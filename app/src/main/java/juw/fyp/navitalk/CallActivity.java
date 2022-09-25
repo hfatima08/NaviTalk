@@ -8,7 +8,10 @@ import android.content.Intent;
 import android.media.MediaPlayer;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
+import android.speech.tts.TextToSpeech;
 import android.util.Log;
+import android.view.GestureDetector;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
@@ -33,6 +36,9 @@ import com.opentok.android.Subscriber;
 
 import org.checkerframework.checker.units.qual.C;
 
+import java.util.Locale;
+
+import juw.fyp.navitalk.detection.CameraActivity;
 import juw.fyp.navitalk.detection.DetectorActivity;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -56,7 +62,9 @@ public class CallActivity extends AppCompatActivity
     Session session;
     Publisher publisher;
     Subscriber subscriber;
-
+    SwipeListener swipeListener;
+    Intent intent;
+    TextToSpeech t1;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,13 +73,16 @@ public class CallActivity extends AppCompatActivity
 
         userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         ref = FirebaseDatabase.getInstance().getReference().child("Users");
-
         volId = getIntent().getStringExtra("volId");
-
         endCall= findViewById(R.id.endCall);
         mic = findViewById(R.id.micBtn);
         name = findViewById(R.id.name);
 
+
+        requestPermission();
+
+
+        //Assigning the volunteer's name who the blind has called
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users/"+volId+"/userName");
         reference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -85,21 +96,26 @@ public class CallActivity extends AppCompatActivity
             }
         });
 
+        //end call button code
         endCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                            ref.child(volId).child("Ringing").removeValue();
-                            ref.child(userId).child("Calling").removeValue();
-
-                            session.unpublish(publisher);
-
-                            startActivity(new Intent(getApplicationContext(), DetectorActivity.class));
-                            finish();
+                          cancelCall();
             }
         });
 
-        requestPermission();
+        //speech to endcall
+        t1=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                if (status != TextToSpeech.ERROR) {
+                    t1.setLanguage(Locale.US);
+                    t1.speak("when you want to end your call, swipe right. Swipe left to listen again",TextToSpeech.QUEUE_ADD, null);
+                }
+            }
+        });
 
+        //mute and un-mute mic code
         mic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -115,10 +131,9 @@ public class CallActivity extends AppCompatActivity
                 }
             }
         });
-    }
+    }//end of onCreate()
 
-
-
+    //permission of camera and audio
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -141,7 +156,7 @@ public class CallActivity extends AppCompatActivity
             session.connect(TOKEN);
         }
         else{
-            EasyPermissions.requestPermissions(this,"Need Camera & Mic Permissions ....",RC_VIDEO_APP_PERM,perms);
+            EasyPermissions.requestPermissions(this,"Camera & Audio Permission are Required!",RC_VIDEO_APP_PERM,perms);
         }
     }
 
@@ -160,9 +175,10 @@ public class CallActivity extends AppCompatActivity
 
     }
 
+    //Connecting API Session for Video Call
     @Override
     public void onConnected(Session session) {
-        Log.i(LOG_TAG,"Session Coneected");
+        Log.i(LOG_TAG,"Session Connected");
 
         publisher = new Publisher.Builder(this).build();
         publisher.setPublisherListener(CallActivity.this);
@@ -210,4 +226,67 @@ public class CallActivity extends AppCompatActivity
     public void onError(Session session, OpentokError opentokError) {
 
     }
+
+    //end call code
+    private void cancelCall() {
+        ref.child(volId).child("Ringing").removeValue();
+        ref.child(userId).child("Calling").removeValue();
+
+        session.unpublish(publisher);
+
+        startActivity(new Intent(getApplicationContext(), DetectorActivity.class));
+        finish();
+    }
+
+//swipe gesture
+    private class SwipeListener implements View.OnTouchListener{
+        GestureDetector gestureDetector;
+
+        SwipeListener(View view){
+            int threshold= 100;
+            int velocity_threshold=100;
+
+            GestureDetector.SimpleOnGestureListener listener = new GestureDetector.SimpleOnGestureListener(){
+                @Override
+                public boolean onDown(MotionEvent e) {
+                    return true;
+                }
+
+                @Override
+                public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                    float xDiff = e2.getX() - e1.getX();
+                    float yDiff = e2.getY() - e1.getY();
+                    try {
+                        if(Math.abs(xDiff) > Math.abs(yDiff)){
+                            if(Math.abs(xDiff) > threshold && Math.abs(velocityX) > velocity_threshold){
+                                if(xDiff>0){
+                                    cancelCall();
+                                }
+                                else{
+//                                    textView.setText("swiped left");
+                                    t1.speak("when you want to end your call.",TextToSpeech.QUEUE_ADD, null);
+                                }
+                                return true;
+                            }
+                        }
+
+                    }catch (Exception e){
+                        e.printStackTrace();
+                    }
+                    return false;
+                }
+            };
+
+            gestureDetector = new GestureDetector(listener);
+
+            view.setOnTouchListener(this);
+        }
+
+        @Override
+        public boolean onTouch(View v, MotionEvent event) {
+            return gestureDetector.onTouchEvent(event);
+        }
+
+    }
+
 }

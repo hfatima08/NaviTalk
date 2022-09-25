@@ -17,10 +17,8 @@
 package juw.fyp.navitalk.detection;
 
 import android.Manifest;
-import android.app.AlertDialog;
 import android.app.Fragment;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
@@ -32,15 +30,12 @@ import android.media.Image;
 import android.media.Image.Plane;
 import android.media.ImageReader;
 import android.media.ImageReader.OnImageAvailableListener;
-import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Trace;
-import android.provider.Settings;
 import android.speech.RecognizerIntent;
-import android.speech.SpeechRecognizer;
 import android.speech.tts.TextToSpeech;
 import android.util.Size;
 import android.view.GestureDetector;
@@ -49,9 +44,6 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
-import android.widget.Adapter;
-import android.widget.Button;
-import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -61,7 +53,6 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.appcompat.widget.SwitchCompat;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
@@ -71,7 +62,6 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
-import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
 import com.google.firebase.database.DataSnapshot;
@@ -81,8 +71,6 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
 import juw.fyp.navitalk.Adapter.UserAdapter;
-import juw.fyp.navitalk.CallActivity;
-import juw.fyp.navitalk.CameraScreen;
 import juw.fyp.navitalk.ConnectingActivity;
 import juw.fyp.navitalk.R;
 import juw.fyp.navitalk.RoleScreen;
@@ -94,28 +82,31 @@ import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Locale;
 
-import static androidx.recyclerview.widget.RecyclerView.*;
-
 public abstract class CameraActivity extends AppCompatActivity
     implements OnImageAvailableListener,
         Camera.PreviewCallback{
   private static final Logger LOGGER = new Logger();
-  //FloatingActionButton logout;
   GoogleSignInClient signInClient;
   GoogleSignInOptions signInOptions;
-  TextView code;
+  TextView code,vol;
   FirebaseAuth auth;
   UserAdapter userAdapter;
   ArrayList<Users> Alist;
   RecyclerView rv;
-  TextView vol;
-  // Button call;
-   RelativeLayout relativeLayout;
+  RelativeLayout relativeLayout;
   SwipeListener swipeListener;
   TextToSpeech t1;
+  DatabaseReference reference;
+  Long data;
+  String uid,obj;
+  String[] labels = {"person","bicycle","car", "motorcycle","airplane","bus","train","truck", "boat","traffic light", "fire hydrant","stop sign","parking meter", "bench",
+          "bird","cat","dog","horse","sheep","cow","elephant", "bear","zebra", "giraffe","backpack","umbrella","handbag","tie","suitcase","frisbee","skis","snowboard","sports ball",
+          "kite", "baseball bat","baseball glove","skateboard","surfboard","tennis racket","bottle","wine glass","cup","fork","knife","spoon","bowl" ,"banana","apple",
+          "sandwich","orange","broccoli","carrot","hot dog","pizza","donut","cake","chair","couch","potted plant","bed","dining table","toilet","tv","laptop","mouse", "remote",
+          "keyboard","cell phone","microwave","oven","toaster","sink","refrigerator","book","clock","vase","scissors","teddy bear","hair drier","toothbrush"};
+  Intent intent;
 
   private static final int PERMISSIONS_REQUEST = 1;
-
   private static final String PERMISSION_CAMERA = Manifest.permission.CAMERA;
   protected int previewWidth = 0;
   protected int previewHeight = 0;
@@ -129,18 +120,10 @@ public abstract class CameraActivity extends AppCompatActivity
   private int yRowStride;
   private Runnable postInferenceCallback;
   private Runnable imageConverter;
-
   private LinearLayout bottomSheetLayout;
   private LinearLayout gestureLayout;
   private BottomSheetBehavior<LinearLayout> sheetBehavior;
-
   protected ImageView bottomSheetArrowImageView;
-
-  DatabaseReference reference;
-  String data,uid;
-  Intent intent;
-
-  ArrayList<String> vol_list = new ArrayList<String>();
 
   @Override
   protected void onCreate(final Bundle savedInstanceState) {
@@ -149,7 +132,6 @@ public abstract class CameraActivity extends AppCompatActivity
     getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
 
     setContentView(R.layout.tfe_od_activity_camera);
-
 
     auth = FirebaseAuth.getInstance();
     uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
@@ -178,14 +160,11 @@ public abstract class CameraActivity extends AppCompatActivity
     userAdapter = new UserAdapter(Alist,this);
     rv.setAdapter(userAdapter);
     vol = findViewById(R.id.vol);
- //   call = findViewById(R.id.btn_call);
 
+   getCode();
+   getVolunteer();
 
-//    call.setOnClickListener(this);
-
-    getCode();
-    getVolunteer();
-
+//BottomSheet code
     ViewTreeObserver vto = gestureLayout.getViewTreeObserver();
     vto.addOnGlobalLayoutListener(
         new ViewTreeObserver.OnGlobalLayoutListener() {
@@ -232,6 +211,8 @@ public abstract class CameraActivity extends AppCompatActivity
           public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
         });
 
+
+    //textToSpeech Code
     swipeListener = new SwipeListener(relativeLayout);
 
     t1=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
@@ -245,10 +226,11 @@ public abstract class CameraActivity extends AppCompatActivity
     });
 
    intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
+   intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
-  }//end oncreate()
+  }//end of onCreate()
 
+  //Swipe Gesture Code
   private class SwipeListener implements View.OnTouchListener{
     GestureDetector gestureDetector;
 
@@ -315,6 +297,7 @@ public abstract class CameraActivity extends AppCompatActivity
 
   }
 
+  //Responses of Voice Commands
   @Override
   protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
@@ -327,6 +310,27 @@ public abstract class CameraActivity extends AppCompatActivity
             case "log out":
               SignOut();
               break;
+
+            case "detection":
+              t1.speak("Tell me the object you want to detect when i say start speaking", TextToSpeech.QUEUE_ADD, null);
+              new Handler().postDelayed(new Runnable() {
+                @Override
+                public void run() {
+              t1.speak("start speaking", TextToSpeech.QUEUE_ADD, null);
+                  new Handler().postDelayed(new Runnable() {
+                    @Override
+                    public void run() {
+                  intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "What do you want to detect");
+                  if (intent.resolveActivity(getPackageManager()) != null) {
+                    startActivityForResult(intent, 30);
+                  } else {
+                    t1.speak("Your device does not support speech input", TextToSpeech.QUEUE_ADD, null);
+                  }
+                    }
+                  }, 2000);
+                }
+              }, 4000);
+                  break;
 
             case "video call":
               t1.speak("who do you want to call? Tell me the number for the respective volunteer when i say start speaking", TextToSpeech.QUEUE_ADD, null);
@@ -359,6 +363,7 @@ public abstract class CameraActivity extends AppCompatActivity
 
           }
     break;
+
         case 20:
           String cmd2 = result.get(0);
          int num = Integer.parseInt(cmd2);
@@ -368,16 +373,27 @@ public abstract class CameraActivity extends AppCompatActivity
           t1.speak("Calling"+Alist.get(num).getUserName(), TextToSpeech.QUEUE_ADD, null);
           intent.putExtra("vol",id);
           startActivity(intent);
+
+      case 30:
+       obj = result.get(0);
+        for(int i=0; i<=labels.length;i++){
+          if(obj.equals(labels[i])){
+            t1.speak("detecting "+obj, TextToSpeech.QUEUE_ADD, null);
+         //  onImageAvailable();
+            break;
+          }
+        }
+
+
       }
     }
 
     else{
       t1.speak("Sorry, I didn't hear anything", TextToSpeech.QUEUE_ADD, null);
     }
-
-
-
   }
+
+  //Logout Code
   private void SignOut() {
     signInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
       @Override
@@ -386,19 +402,20 @@ public abstract class CameraActivity extends AppCompatActivity
         Intent intent = new Intent(getApplicationContext(), RoleScreen.class);
         finishAffinity();
         startActivity(intent);
-
       }
     });
   }
 
+  //Fetch Blind's Assistance Code
   private void getCode() {
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users/"+user.getUid()+"/code");
     reference.addListenerForSingleValueEvent(new ValueEventListener() {
       @Override
       public void onDataChange(DataSnapshot dataSnapshot) {
-        data = dataSnapshot.getValue(String.class);
-        code.setText("ASSISTANCE CODE: "+data);
+        String users = dataSnapshot.getValue(String.class);
+        data = Long.parseLong(users);
+        code.setText("ASSISTANCE CODE: "+ data);
       }
       @Override
       public void onCancelled(@NonNull DatabaseError error) {
@@ -407,26 +424,22 @@ public abstract class CameraActivity extends AppCompatActivity
     });
   }
 
+  //Fetch Volunteer's Data
   private void getVolunteer() {
-
     DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
     reference.addValueEventListener(new ValueEventListener() {
       @Override
       public void onDataChange(@NonNull DataSnapshot snapshot) {
         Alist.clear();
-        for(DataSnapshot dataSnapshot: snapshot.getChildren()){
-        Users users = dataSnapshot.getValue(Users.class);
-
-            if(users.getRole().equals("Volunteer") && users.getCode().equals(data)){
-              vol.setText("VOLUNTEERS");
-              Alist.add(users);
-
-
-          }
-
-
-
-        }
+//        for(DataSnapshot dataSnapshot: snapshot.getChildren()){
+//       Users users = dataSnapshot.getValue(Users.class);
+//          Toast.makeText(CameraActivity.this, dataSnapshot.getValue(Users.class).toString(), Toast.LENGTH_SHORT).show();
+//           if(users.getRole().equals("Volunteer")){
+//              vol.setText("VOLUNTEERS");
+//              Alist.add(users);
+//              Toast.makeText(CameraActivity.this, Alist.toString(), Toast.LENGTH_SHORT).show();
+//          }
+ //       }
         userAdapter.notifyDataSetChanged();
       }
 
@@ -443,25 +456,11 @@ public abstract class CameraActivity extends AppCompatActivity
 
   }
 
-//  public void onClick(View view){
-//    Intent intent = new Intent(getApplicationContext(), ConnectingActivity.class);
-//    String vol = vol_list.get(0);
-//    intent.putExtra("volList",vol);
-//    startActivity(intent);
-//
-//  }
 
+  //TensorFlow Api Detection and Camera Code
   protected int[] getRgbBytes() {
     imageConverter.run();
     return rgbBytes;
-  }
-
-  protected int getLuminanceStride() {
-    return yRowStride;
-  }
-
-  protected byte[] getLuminance() {
-    return yuvBytes[0];
   }
 
   /** Callback for android.hardware.Camera API */
@@ -506,7 +505,9 @@ public abstract class CameraActivity extends AppCompatActivity
             isProcessingFrame = false;
           }
         };
-    processImage();
+
+
+    processImage(obj);
   }
 
   /** Callback for Camera2 API */
@@ -564,7 +565,7 @@ public abstract class CameraActivity extends AppCompatActivity
             }
           };
 
-      processImage();
+     processImage(obj);
     } catch (final Exception e) {
       LOGGER.e(e, "Exception!");
       Trace.endSection();
@@ -780,7 +781,7 @@ public abstract class CameraActivity extends AppCompatActivity
   }
 
 
-  protected abstract void processImage();
+  protected abstract void processImage(String obj);
 
   protected abstract void onPreviewSizeChosen(final Size size, final int rotation);
 

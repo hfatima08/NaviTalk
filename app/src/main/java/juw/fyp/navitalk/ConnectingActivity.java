@@ -44,8 +44,7 @@ public class ConnectingActivity extends AppCompatActivity {
     FirebaseAuth auth;
     FirebaseDatabase database;
     DatabaseReference reference;
-    ArrayList<String> vol_list;
-    String username,checker=" ",callingId,ringingId;
+    String username,checker=" ";
     ImageView endCall,acceptCall;
     MediaPlayer mediaPlayer;
     String volid=" ";
@@ -54,6 +53,7 @@ public class ConnectingActivity extends AppCompatActivity {
     Intent intent;
     TextToSpeech t1;
     TextView name;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -66,7 +66,6 @@ public class ConnectingActivity extends AppCompatActivity {
 
         auth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
-      //  vol_list = (ArrayList<String>) getIntent().getSerializableExtra("volList");
         volid = getIntent().getStringExtra("vol");
         username = auth.getUid();
         reference = FirebaseDatabase.getInstance().getReference("Users");
@@ -75,6 +74,7 @@ public class ConnectingActivity extends AppCompatActivity {
 
         swipeListener = new SwipeListener(linearLayout);
 
+        //Assigning the volunteer's name who the blind has called
         reference.child(volid).child("userName").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -87,19 +87,22 @@ public class ConnectingActivity extends AppCompatActivity {
             }
         });
 
+        //speech to endcall
         t1=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
                 if (status != TextToSpeech.ERROR) {
                     t1.setLanguage(Locale.US);
-                    t1.speak("when you want to end your call, swipe right",TextToSpeech.QUEUE_ADD, null);
+                    t1.speak("when you want to end your call, swipe right. Swipe left to listen again",TextToSpeech.QUEUE_ADD, null);
                 }
             }
         });
 
+        //calling google intent for speech
         intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
+        //endcall button
         endCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -116,7 +119,7 @@ public class ConnectingActivity extends AppCompatActivity {
             }
         }, 1000);
 
-
+    //end call if the volunteer end's call
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -136,9 +139,9 @@ public class ConnectingActivity extends AppCompatActivity {
             }
         }, 4000);
 
-    }//oncreate
+    }// end of onCreate()
 
-
+    //Swipe gesture
     private class SwipeListener implements View.OnTouchListener{
         GestureDetector gestureDetector;
 
@@ -161,27 +164,10 @@ public class ConnectingActivity extends AppCompatActivity {
                             if(Math.abs(xDiff) > threshold && Math.abs(velocityX) > velocity_threshold){
                                 if(xDiff>0){
                                     cancelCall();
- //                                   textView.setText("swiped right");
-//                                    t1.speak("Start speaking",TextToSpeech.QUEUE_ADD, null);
-//                                    new Handler().postDelayed(new Runnable() {
-//                                        @Override
-//                                        public void run() {
-//                                            Intent intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
-//                                            intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
-//                                            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Start Speaking");
-//                                            if(intent.resolveActivity(getPackageManager())!=null){
-//                                                startActivityForResult(intent,10);
-//                                            }else{
-//                                                t1.speak("Your device does not support speech input", TextToSpeech.QUEUE_ADD, null);
-//                                            }
-//
-//                                        }
-//                                    }, 1000);
-
                                 }
                                 else{
 //                                    textView.setText("swiped left");
-                                    t1.speak("when you want to end your call, swipe right and say end call.",TextToSpeech.QUEUE_ADD, null);
+                                    t1.speak("when you want to end your call, swipe right.",TextToSpeech.QUEUE_ADD, null);
                                 }
                                 return true;
                             }
@@ -206,29 +192,10 @@ public class ConnectingActivity extends AppCompatActivity {
 
     }
 
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        switch(requestCode){
-            case 10:
-                if(resultCode == RESULT_OK && data != null){
-                    ArrayList<String> result =  data.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS);
-                   if(result.get(0).equals("end call")){
-                       cancelCall();
-                   }
-
-                }else{
-                    t1.speak("Sorry, I didn't hear anything", TextToSpeech.QUEUE_ADD, null);
-                }
-        }
-    }
-
-
+    //Connect Call
     public void connectCall(){
       mediaPlayer.start();
 
-    //  volid = vol_list.get(0);
       reference.child(volid).addListenerForSingleValueEvent(new ValueEventListener() {
           @Override
           public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -261,6 +228,7 @@ public class ConnectingActivity extends AppCompatActivity {
           }
       });
 
+      //Go To Call Activity When volunteer picks up
       reference.addValueEventListener(new ValueEventListener() {
           @Override
           public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -279,95 +247,16 @@ public class ConnectingActivity extends AppCompatActivity {
 
           }
       });
-
-
-
-
   }
 
-
+//EndCall method
     private void cancelCall() {
-
         mediaPlayer.stop();
         reference.child(volid).child("Ringing").removeValue();
         reference.child(username).child("Calling").removeValue();
 
         startActivity(new Intent(getApplicationContext(), DetectorActivity.class));
         finish();
-
-        //senders call
-//        reference.child(username)
-//                .child("Calling")
-//                .addListenerForSingleValueEvent(new ValueEventListener() {
-//                    @Override
-//                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                        if(snapshot.exists() && snapshot.hasChild("calling")) {
-//                            callingId = snapshot.child("calling").getValue().toString();
-//
-//                            reference.child(callingId)
-//                                    .child("Ringing")
-//                                    .removeValue()
-//                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-//                                        @Override
-//                                        public void onComplete(@NonNull Task<Void> task) {
-//                                            if(task.isSuccessful()){
-//                                                reference.child(username)
-//                                                        .child("Calling")
-//                                                        .removeValue();
-//
-//                                            }
-//                                        }
-//                                    });
-//                        }
-//                        else{
-//                            startActivity(new Intent(getApplicationContext(),DetectorActivity.class));
-//                            finish();
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onCancelled(@NonNull DatabaseError error) {
-//
-//                    }
-//                });
-//
-//        //receiver's call
-//        reference.child(volid)
-//                .child("Ringing")
-//                .addListenerForSingleValueEvent(new ValueEventListener() {
-//                    @Override
-//                    public void onDataChange(@NonNull DataSnapshot snapshot) {
-//                        if(snapshot.exists() && snapshot.hasChild("ringing")) {
-//                            ringingId = snapshot.child("ringing").getValue().toString();
-//
-//                            reference.child(ringingId)
-//                                    .child("Calling")
-//                                    .removeValue()
-//                                    .addOnCompleteListener(new OnCompleteListener<Void>() {
-//                                        @Override
-//                                        public void onComplete(@NonNull Task<Void> task) {
-//                                            if(task.isSuccessful()){
-//                                                reference.child(username)
-//                                                        .child("Ringing")
-//                                                        .removeValue();
-//
-//                                                startActivity(new Intent(getApplicationContext(), DetectorActivity.class));
-//                                                finish();
-//                                            }
-//                                        }
-//                                    });
-//                        }
-//                        else{
-//                            startActivity(new Intent(getApplicationContext(), DetectorActivity.class));
-//                            finish();
-//                        }
-//                    }
-//
-//                    @Override
-//                    public void onCancelled(@NonNull DatabaseError error) {
-//
-//                    }
-//                });
    }
 
 }
