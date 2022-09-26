@@ -99,7 +99,7 @@ public abstract class CameraActivity extends AppCompatActivity
   SwipeListener swipeListener;
   TextToSpeech t1;
   DatabaseReference reference;
-  Long data;
+  Long bcode;
   String uid,obj;
   String[] labels = {"person","bicycle","car", "motorcycle","airplane","bus","train","truck", "boat","traffic light", "fire hydrant","stop sign","parking meter", "bench",
           "bird","cat","dog","horse","sheep","cow","elephant", "bear","zebra", "giraffe","backpack","umbrella","handbag","tie","suitcase","frisbee","skis","snowboard","sports ball",
@@ -276,13 +276,14 @@ public abstract class CameraActivity extends AppCompatActivity
                         t1.speak("Your device does not support speech input", TextToSpeech.QUEUE_ADD, null);
                       }
 
+
                     }
                   }, 1000);
 
                 }
                 else{
              //     textView.setText("swiped left");
-                  t1.speak("If you want to detect an object say detection. Anytime you require visual assistance, say video call. Simply say logout to get logged out from your account.", TextToSpeech.QUEUE_ADD, null);
+                  t1.speak("If you want to detect an object say detection.You are assigned an assistance code that your volunteers would need to login so that they can help you through visual assistance. To know your code just say code. Anytime you require visual assistance, say video call. Simply say logout to get logged out from your account.", TextToSpeech.QUEUE_ADD, null);
                   t1.speak("Swipe left to listen again and swipe right to say something.", TextToSpeech.QUEUE_ADD, null);
                 }
                 return true;
@@ -346,10 +347,13 @@ public abstract class CameraActivity extends AppCompatActivity
             case "video call":
               t1.speak("who do you want to call? Tell me the number for the respective volunteer when i say start speaking", TextToSpeech.QUEUE_ADD, null);
               //Toast.makeText(this, Alist.get(0).getUserName(), Toast.LENGTH_SHORT).show();
+              if(!Alist.isEmpty()){
               for (Users vol : Alist) {
                 int i = 1;
                 t1.speak("say"+ i + "for" + vol.getUserName(), TextToSpeech.QUEUE_ADD, null);
                 i++;
+              }}else{
+                t1.speak("No Volunteer Registered. You have to give your assistance code to your volunteer. To know your code swipe right and say code ", TextToSpeech.QUEUE_ADD, null);
               }
 
               new Handler().postDelayed(new Runnable() {
@@ -371,7 +375,12 @@ public abstract class CameraActivity extends AppCompatActivity
                 }
               }, 9000);
 
+            case "code":
+              t1.speak("Your Assistance code is :"+bcode.toString(), TextToSpeech.QUEUE_ADD, null);
+              break;
 
+            default:
+              t1.speak("Sorry! I didn't understand what you said. Swipe left to listen the features.", TextToSpeech.QUEUE_ADD, null);
           }
     break;
 
@@ -390,11 +399,14 @@ public abstract class CameraActivity extends AppCompatActivity
         for(int i=0; i<=labels.length;i++){
           if(obj.equals(labels[i])){
             t1.speak("detecting "+obj, TextToSpeech.QUEUE_ADD, null);
-         //  onImageAvailable();
             break;
           }
         }
+        t1.speak("I cannot detect a "+obj, TextToSpeech.QUEUE_ADD, null);
+          break;
 
+      default:
+        t1.speak("Sorry! I didn't understand what you said. Swipe left to listen the features.", TextToSpeech.QUEUE_ADD, null);
 
       }
     }
@@ -425,8 +437,8 @@ public abstract class CameraActivity extends AppCompatActivity
       @Override
       public void onDataChange(DataSnapshot dataSnapshot) {
         Long users = dataSnapshot.getValue(Long.class);
-        data = Long.parseLong(users.toString());
-        code.setText("ASSISTANCE CODE: "+ data);
+        bcode = Long.parseLong(users.toString());
+        code.setText("ASSISTANCE CODE: "+ bcode);
       }
       @Override
       public void onCancelled(@NonNull DatabaseError error) {
@@ -445,7 +457,7 @@ public abstract class CameraActivity extends AppCompatActivity
         for(DataSnapshot dataSnapshot: snapshot.getChildren()){
 
        Users users = dataSnapshot.getValue(Users.class);
-           if(users.getRole().equals("Volunteer") && users.getCode().equals(data)){
+           if(users.getRole().equals("Volunteer") && users.getCode().equals(bcode)){
               vol.setText("VOLUNTEERS");
               Alist.add(users);
           }
