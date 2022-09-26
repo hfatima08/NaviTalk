@@ -38,9 +38,9 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
         PublisherKit.PublisherListener {
 
     private static String API_KEY = "47555231";
-    private static String SESSION_ID = "2_MX40NzU1NTIzMX5-MTY2MzY5NDE2NjA3NH5OR1ZkdWkwem5TYkR5SDBLbndick8yUyt-fg";
-    private static String TOKEN ="T1==cGFydG5lcl9pZD00NzU1NTIzMSZzaWc9MzVlZWM4OTU1YzcxMDZhMmVjNmZlMmE1OTc1ZTMwMGE2ODMwOGY0ZjpzZXNzaW9uX2lkPTJfTVg0ME56VTFOVEl6TVg1LU1UWTJNelk1TkRFMk5qQTNOSDVPUjFaa2RXa3dlbTVUWWtSNVNEQkxibmRpY2s4eVV5dC1mZyZjcmVhdGVfdGltZT0xNjYzNjk0MTg2Jm5vbmNlPTAuODg4OTE4MzM2NzE2NjMyOSZyb2xlPXB1Ymxpc2hlciZleHBpcmVfdGltZT0xNjYzNjk3Nzg3JmluaXRpYWxfbGF5b3V0X2NsYXNzX2xpc3Q9";
-    private static final String LOG_TAG = CallActivity.class.getSimpleName();
+    private static String SESSION_ID = "2_MX40NzU1NTIzMX5-MTY2NDE4OTM1ODUyNX5LZ1hCK0IxalRQeHRUVjhIRlFudUhtQ3J-UH4";
+    private static String TOKEN ="T1==cGFydG5lcl9pZD00NzU1NTIzMSZzaWc9YWIwMGZlNTRhZjliMzhjY2U5YjExY2QxOTZhMGRiOTFkZGY2NDY0ZTpzZXNzaW9uX2lkPTJfTVg0ME56VTFOVEl6TVg1LU1UWTJOREU0T1RNMU9EVXlOWDVMWjFoQ0swSXhhbFJRZUhSVVZqaElSbEZ1ZFVodFEzSi1VSDQmY3JlYXRlX3RpbWU9MTY2NDE4OTM3NSZub25jZT0wLjEwMTM2NDEzOTUwNjY2MDIzJnJvbGU9cHVibGlzaGVyJmV4cGlyZV90aW1lPTE2NjY3ODEzNzQmaW5pdGlhbF9sYXlvdXRfY2xhc3NfbGlzdD0=";
+    private static final String LOG_TAG = CallActivity2.class.getSimpleName();
     private static final int RC_VIDEO_APP_PERM = 124;
 
     ImageView endCall, mic;
@@ -66,6 +66,7 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
         name = findViewById(R.id.bname);
         mic = findViewById(R.id.micBtn);
 
+        //assigning callers name on call screen
         ref.child(BId).child("userName").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -78,6 +79,7 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
             }
         });
 
+        //end call button code
         endCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -89,68 +91,12 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
                             startActivity(new Intent(getApplicationContext(), MainActivity.class));
                             finish();
 
-
-//                        if (snapshot.child(userId).hasChild("Ringing")) {
-//
-//                            ref.child(userId).child("Ringing").removeValue();
-//                            session.disconnect();
-//
-//
-//                            if (publisher != null) {
-//                                publisher.destroy();
-//                                session.unpublish(publisher);
-//                            }
-//
-//                            if (subscriber != null) {
-//                                subscriber.destroy();
-//                                session.unsubscribe(subscriber);
-//                            }
-//
-//                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-//                            finish();
-//                        }
-//
-//                        if (snapshot.child(userId).hasChild("Calling")) {
-//
-//                            ref.child(userId).child("Calling").removeValue();
-//                            session.disconnect();
-//
-//
-//                            if (publisher != null) {
-//                                publisher.destroy();
-//                                session.unpublish(publisher);
-//                            }
-//
-//                            if (subscriber != null) {
-//                                subscriber.destroy();
-//                                session.unsubscribe(subscriber);
-//                            }
-//
-//                            startActivity(new Intent(getApplicationContext(), DetectorActivity.class));
-//                            finish();
-//                        } else {
-//                            session.disconnect();
-//
-//                            if (publisher != null) {
-//                                publisher.destroy();
-//                                session.unpublish(publisher);
-//                            }
-//
-//                            if (subscriber != null) {
-//                                subscriber.destroy();
-//                                session.unsubscribe(subscriber);
-//                            }
-//
-//                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-//                            finish();
-//
-//                        }
-
                                }
         });
 
         requestPermission();
 
+        //mic mute and un-mute code
         mic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -171,6 +117,7 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
             }
         });
 
+        //end call if blind user ends call
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -192,10 +139,7 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
 
     }
 
-
-
-
-
+//permissions
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -237,6 +181,7 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
 
     }
 
+    ///stream connection
     @Override
     public void onConnected(Session session) {
         Log.i(LOG_TAG,"Session Coneected");
@@ -244,7 +189,7 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
         publisher = new Publisher.Builder(this).build();
         publisher.setPublisherListener(CallActivity2.this);
         publisher.setCameraId(0);
-
+        publisher.getRenderer().setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE, BaseVideoRenderer.STYLE_VIDEO_FILL);
         container2.addView(publisher.getView());
 
         if(publisher.getView() instanceof GLSurfaceView){

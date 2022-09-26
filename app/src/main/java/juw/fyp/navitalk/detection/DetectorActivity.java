@@ -26,6 +26,7 @@ import android.graphics.Paint.Style;
 import android.graphics.RectF;
 import android.graphics.Typeface;
 import android.media.ImageReader.OnImageAvailableListener;
+import android.os.Handler;
 import android.os.SystemClock;
 import android.speech.tts.TextToSpeech;
 import android.util.Size;
@@ -79,7 +80,7 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
   private MultiBoxTracker tracker;
   private BorderedText borderedText;
 
-
+  String detected="";
 
   @Override
   public void onPreviewSizeChosen(final Size size, final int rotation) {
@@ -145,6 +146,14 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
 
     tracker.setFrameConfiguration(previewWidth, previewHeight, sensorOrientation);
   }
+//
+//  public void onPause(){
+//    if(t1 !=null){
+//      t1.stop();
+//      t1.shutdown();
+//    }
+//    super.onPause();
+//  }
 
   @Override
   protected void processImage(String obj) {
@@ -205,8 +214,7 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
 
                 result.setLocation(location);
                 mappedRecognitions.add(result);
-                t1.speak(result.getTitle()+"Detected", TextToSpeech.QUEUE_FLUSH, null);
-             //   t1.stop();
+
               }
 
             }
@@ -217,9 +225,16 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
             computingDetection = false;
 
 
+
+
+
           }
         });
+
   }
+
+
+
 
   @Override
   protected int getLayoutId() {

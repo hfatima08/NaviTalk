@@ -76,7 +76,7 @@
         </androidx.recyclerview.widget.RecyclerView>
 
         <Button
-            android:id="@+id/btn_call"
+            android:id="@+id/btn_logout"
             android:layout_width="320dp"
             android:layout_height="55dp"
             android:backgroundTint="@color/colorpurple"

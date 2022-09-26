@@ -104,7 +104,7 @@ public class RoleScreen extends AppCompatActivity implements View.OnClickListene
             public void onInit(int status) {
                 if (status != TextToSpeech.ERROR) {
                     t1.setLanguage(Locale.US);
-                    t1.speak("You are on the role screen, If you want to login as a blind person swipe right.", TextToSpeech.QUEUE_ADD, null);
+                    t1.speak("You are on the role screen, If you want to login as a blind person swipe right.", TextToSpeech.QUEUE_FLUSH, null);
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -118,6 +118,13 @@ public class RoleScreen extends AppCompatActivity implements View.OnClickListene
         intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
+    }
+    public void onPause(){
+        if(t1 !=null){
+            t1.stop();
+            t1.shutdown();
+        }
+        super.onPause();
     }
 
     @Override
@@ -158,7 +165,7 @@ public class RoleScreen extends AppCompatActivity implements View.OnClickListene
                                     startActivity(intent1);
                                 } else {
                                     //     textView.setText("swiped left");
-                                    t1.speak("If you want to login as a blind person swipe right", TextToSpeech.QUEUE_ADD, null);
+                                    t1.speak("If you want to login as a blind person swipe right", TextToSpeech.QUEUE_FLUSH, null);
 
                                 }
                                 return true;

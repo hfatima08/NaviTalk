@@ -155,7 +155,7 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
             public void onInit(int status) {
                 if (status != TextToSpeech.ERROR) {
                     t1.setLanguage(Locale.US);
-                    t1.speak("You are on the login screen, You can only login with your g-mail account. Swipe up for available accounts.", TextToSpeech.QUEUE_ADD, null);
+                    t1.speak("You are on the login screen, You can only login with your g-mail account. Swipe up for available accounts.", TextToSpeech.QUEUE_FLUSH, null);
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
@@ -170,6 +170,14 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
     }//end oncreate
+
+    public void onPause(){
+        if(t1 !=null){
+            t1.stop();
+            t1.shutdown();
+        }
+        super.onPause();
+    }
 
     private class SwipeListener implements View.OnTouchListener {
         GestureDetector gestureDetector;

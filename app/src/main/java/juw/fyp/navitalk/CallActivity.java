@@ -48,8 +48,8 @@ public class CallActivity extends AppCompatActivity
         PublisherKit.PublisherListener {
 
     private static String API_KEY="47555231";
-    private static String SESSION_ID = "2_MX40NzU1NTIzMX5-MTY2MzY5NDE2NjA3NH5OR1ZkdWkwem5TYkR5SDBLbndick8yUyt-fg";
-    private static String TOKEN ="T1==cGFydG5lcl9pZD00NzU1NTIzMSZzaWc9MzVlZWM4OTU1YzcxMDZhMmVjNmZlMmE1OTc1ZTMwMGE2ODMwOGY0ZjpzZXNzaW9uX2lkPTJfTVg0ME56VTFOVEl6TVg1LU1UWTJNelk1TkRFMk5qQTNOSDVPUjFaa2RXa3dlbTVUWWtSNVNEQkxibmRpY2s4eVV5dC1mZyZjcmVhdGVfdGltZT0xNjYzNjk0MTg2Jm5vbmNlPTAuODg4OTE4MzM2NzE2NjMyOSZyb2xlPXB1Ymxpc2hlciZleHBpcmVfdGltZT0xNjYzNjk3Nzg3JmluaXRpYWxfbGF5b3V0X2NsYXNzX2xpc3Q9";
+    private static String SESSION_ID = "2_MX40NzU1NTIzMX5-MTY2NDE4OTM1ODUyNX5LZ1hCK0IxalRQeHRUVjhIRlFudUhtQ3J-UH4";
+    private static String TOKEN ="T1==cGFydG5lcl9pZD00NzU1NTIzMSZzaWc9YWIwMGZlNTRhZjliMzhjY2U5YjExY2QxOTZhMGRiOTFkZGY2NDY0ZTpzZXNzaW9uX2lkPTJfTVg0ME56VTFOVEl6TVg1LU1UWTJOREU0T1RNMU9EVXlOWDVMWjFoQ0swSXhhbFJRZUhSVVZqaElSbEZ1ZFVodFEzSi1VSDQmY3JlYXRlX3RpbWU9MTY2NDE4OTM3NSZub25jZT0wLjEwMTM2NDEzOTUwNjY2MDIzJnJvbGU9cHVibGlzaGVyJmV4cGlyZV90aW1lPTE2NjY3ODEzNzQmaW5pdGlhbF9sYXlvdXRfY2xhc3NfbGlzdD0=";
     private static final String LOG_TAG = CallActivity.class.getSimpleName();
     private static final int RC_VIDEO_APP_PERM=124;
 
@@ -65,6 +65,7 @@ public class CallActivity extends AppCompatActivity
     SwipeListener swipeListener;
     Intent intent;
     TextToSpeech t1;
+    FrameLayout frameLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -77,6 +78,7 @@ public class CallActivity extends AppCompatActivity
         endCall= findViewById(R.id.endCall);
         mic = findViewById(R.id.micBtn);
         name = findViewById(R.id.name);
+        frameLayout = findViewById(R.id.frameLayout);
 
 
         requestPermission();
@@ -103,6 +105,9 @@ public class CallActivity extends AppCompatActivity
                           cancelCall();
             }
         });
+
+        swipeListener = new SwipeListener(frameLayout);
+
 
         //speech to endcall
         t1=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
@@ -131,6 +136,9 @@ public class CallActivity extends AppCompatActivity
                 }
             }
         });
+
+
+
     }//end of onCreate()
 
     //permission of camera and audio
@@ -183,6 +191,7 @@ public class CallActivity extends AppCompatActivity
         publisher = new Publisher.Builder(this).build();
         publisher.setPublisherListener(CallActivity.this);
         publisher.setCameraId(0);
+        publisher.getRenderer().setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE, BaseVideoRenderer.STYLE_VIDEO_FILL);
         container2.addView(publisher.getView());
 
         if(publisher.getView() instanceof GLSurfaceView){
@@ -227,17 +236,6 @@ public class CallActivity extends AppCompatActivity
 
     }
 
-    //end call code
-    private void cancelCall() {
-        ref.child(volId).child("Ringing").removeValue();
-        ref.child(userId).child("Calling").removeValue();
-
-        session.unpublish(publisher);
-
-        startActivity(new Intent(getApplicationContext(), DetectorActivity.class));
-        finish();
-    }
-
 //swipe gesture
     private class SwipeListener implements View.OnTouchListener{
         GestureDetector gestureDetector;
@@ -264,7 +262,7 @@ public class CallActivity extends AppCompatActivity
                                 }
                                 else{
 //                                    textView.setText("swiped left");
-                                    t1.speak("when you want to end your call.",TextToSpeech.QUEUE_ADD, null);
+                                    t1.speak("when you want to end your call,Swipre right.",TextToSpeech.QUEUE_ADD, null);
                                 }
                                 return true;
                             }
@@ -287,6 +285,17 @@ public class CallActivity extends AppCompatActivity
             return gestureDetector.onTouchEvent(event);
         }
 
+    }
+
+    //end call code
+    private void cancelCall() {
+        ref.child(volId).child("Ringing").removeValue();
+        ref.child(userId).child("Calling").removeValue();
+
+        session.unpublish(publisher);
+
+        startActivity(new Intent(getApplicationContext(), DetectorActivity.class));
+        finish();
     }
 
 }

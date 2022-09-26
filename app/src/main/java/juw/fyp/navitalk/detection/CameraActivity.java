@@ -44,6 +44,7 @@ import android.view.Surface;
 import android.view.View;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
@@ -89,6 +90,7 @@ public abstract class CameraActivity extends AppCompatActivity
   GoogleSignInClient signInClient;
   GoogleSignInOptions signInOptions;
   TextView code,vol;
+  Button logout;
   FirebaseAuth auth;
   UserAdapter userAdapter;
   ArrayList<Users> Alist;
@@ -154,6 +156,7 @@ public abstract class CameraActivity extends AppCompatActivity
     bottomSheetArrowImageView = findViewById(R.id.bottom_sheet_arrow);
     code = findViewById(R.id.code);
     rv = findViewById(R.id.list);
+    logout = findViewById(R.id.btn_logout);
     Alist = new ArrayList<>();
     LinearLayoutManager layoutManager = new LinearLayoutManager(this);
     rv.setLayoutManager(layoutManager);
@@ -228,6 +231,14 @@ public abstract class CameraActivity extends AppCompatActivity
    intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
+   //Logout Button Code
+    logout.setOnClickListener(new View.OnClickListener() {
+      @Override
+      public void onClick(View v) {
+        SignOut();
+      }
+    });
+
   }//end of onCreate()
 
   //Swipe Gesture Code
@@ -271,7 +282,7 @@ public abstract class CameraActivity extends AppCompatActivity
                 }
                 else{
              //     textView.setText("swiped left");
-                  t1.speak("If you want to detect an object say detect and the object's name for example detect glass or detect chair. Anytime you require visual assistance, say video call. Simply say logout to get logged out from your account.", TextToSpeech.QUEUE_ADD, null);
+                  t1.speak("If you want to detect an object say detection. Anytime you require visual assistance, say video call. Simply say logout to get logged out from your account.", TextToSpeech.QUEUE_ADD, null);
                   t1.speak("Swipe left to listen again and swipe right to say something.", TextToSpeech.QUEUE_ADD, null);
                 }
                 return true;
@@ -413,8 +424,8 @@ public abstract class CameraActivity extends AppCompatActivity
     reference.addListenerForSingleValueEvent(new ValueEventListener() {
       @Override
       public void onDataChange(DataSnapshot dataSnapshot) {
-        String users = dataSnapshot.getValue(String.class);
-        data = Long.parseLong(users);
+        Long users = dataSnapshot.getValue(Long.class);
+        data = Long.parseLong(users.toString());
         code.setText("ASSISTANCE CODE: "+ data);
       }
       @Override
@@ -431,15 +442,14 @@ public abstract class CameraActivity extends AppCompatActivity
       @Override
       public void onDataChange(@NonNull DataSnapshot snapshot) {
         Alist.clear();
-//        for(DataSnapshot dataSnapshot: snapshot.getChildren()){
-//       Users users = dataSnapshot.getValue(Users.class);
-//          Toast.makeText(CameraActivity.this, dataSnapshot.getValue(Users.class).toString(), Toast.LENGTH_SHORT).show();
-//           if(users.getRole().equals("Volunteer")){
-//              vol.setText("VOLUNTEERS");
-//              Alist.add(users);
-//              Toast.makeText(CameraActivity.this, Alist.toString(), Toast.LENGTH_SHORT).show();
-//          }
- //       }
+        for(DataSnapshot dataSnapshot: snapshot.getChildren()){
+
+       Users users = dataSnapshot.getValue(Users.class);
+           if(users.getRole().equals("Volunteer") && users.getCode().equals(data)){
+              vol.setText("VOLUNTEERS");
+              Alist.add(users);
+          }
+         }
         userAdapter.notifyDataSetChanged();
       }
 
