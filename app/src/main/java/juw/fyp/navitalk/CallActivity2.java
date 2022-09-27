@@ -12,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -52,7 +53,7 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
     Publisher publisher;
     Subscriber subscriber;
     TextView name;
-
+    LinearLayout progess;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,6 +66,7 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
         endCall = findViewById(R.id.endCall);
         name = findViewById(R.id.bname);
         mic = findViewById(R.id.micBtn);
+        progess = findViewById(R.id.progress);
 
         //assigning callers name on call screen
         ref.child(BId).child("userName").addValueEventListener(new ValueEventListener() {
@@ -184,11 +186,11 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
     ///stream connection
     @Override
     public void onConnected(Session session) {
-        Log.i(LOG_TAG,"Session Coneected");
+        Log.i(LOG_TAG,"Session Connected");
 
         publisher = new Publisher.Builder(this).build();
         publisher.setPublisherListener(CallActivity2.this);
-        publisher.setCameraId(0);
+        publisher.setCameraId(1);
         publisher.getRenderer().setStyle(BaseVideoRenderer.STYLE_VIDEO_SCALE, BaseVideoRenderer.STYLE_VIDEO_FILL);
         container2.addView(publisher.getView());
 
@@ -198,6 +200,7 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
         }
 
         session.publish(publisher);
+        progess.setVisibility(View.GONE);
     }
 
     @Override

@@ -15,6 +15,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -66,7 +67,7 @@ public class CallActivity extends AppCompatActivity
     Intent intent;
     TextToSpeech t1;
     FrameLayout frameLayout;
-
+    LinearLayout progess;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -79,6 +80,7 @@ public class CallActivity extends AppCompatActivity
         mic = findViewById(R.id.micBtn);
         name = findViewById(R.id.name);
         frameLayout = findViewById(R.id.frameLayout);
+        progess = findViewById(R.id.progress);
 
 
         requestPermission();
@@ -200,6 +202,8 @@ public class CallActivity extends AppCompatActivity
         }
 
         session.publish(publisher);
+        progess.setVisibility(View.GONE);
+
     }
 
     @Override
