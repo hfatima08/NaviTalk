@@ -119,6 +119,7 @@ public class RoleScreen extends AppCompatActivity implements View.OnClickListene
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
     }
+
     public void onPause(){
         if(t1 !=null){
             t1.stop();

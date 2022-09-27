@@ -126,6 +126,7 @@ public abstract class CameraActivity extends AppCompatActivity
   private LinearLayout gestureLayout;
   private BottomSheetBehavior<LinearLayout> sheetBehavior;
   protected ImageView bottomSheetArrowImageView;
+  private Object ArrayIndexOutOfBoundsException;
 
   @Override
   protected void onCreate(final Bundle savedInstanceState) {
@@ -223,7 +224,7 @@ public abstract class CameraActivity extends AppCompatActivity
       public void onInit(int status) {
         if (status != TextToSpeech.ERROR) {
           t1.setLanguage(Locale.US);
-          t1.speak("You are on the detection Screen, swipe left to listen the features and swipe right to say something.",TextToSpeech.QUEUE_ADD, null);
+          t1.speak("You are on the Main Screen, swipe left to listen the features and swipe right to say something.",TextToSpeech.QUEUE_ADD, null);
         }
       }
     });
@@ -264,7 +265,6 @@ public abstract class CameraActivity extends AppCompatActivity
               if(Math.abs(xDiff) > threshold && Math.abs(velocityX) > velocity_threshold){
                 if(xDiff>0){
                   //textView.setText("swiped right");
-
                   t1.speak("Start speaking",TextToSpeech.QUEUE_ADD, null);
                   new Handler().postDelayed(new Runnable() {
                     @Override
@@ -272,7 +272,14 @@ public abstract class CameraActivity extends AppCompatActivity
                       intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Start Speaking");
                       if(intent.resolveActivity(getPackageManager())!=null){
                         startActivityForResult(intent,10);
+                        new Handler().postDelayed(new Runnable() {
+                          @Override
+                          public void run() {
+                            finishActivity(10);
+                          }
+                        },5000);
                       }else{
+
                         t1.speak("Your device does not support speech input", TextToSpeech.QUEUE_ADD, null);
                       }
 
@@ -283,13 +290,27 @@ public abstract class CameraActivity extends AppCompatActivity
                 }
                 else{
              //     textView.setText("swiped left");
-                  t1.speak("If you want to detect an object say detection.You are assigned an assistance code that your volunteers would need to login so that they can help you through visual assistance. To know your code just say code. Anytime you require visual assistance, say video call. Simply say logout to get logged out from your account.", TextToSpeech.QUEUE_ADD, null);
+                  t1.speak("If you want to detect an object say detection. You are assigned an assistance code. The volunteer will need this code to help you through video call. To know your code just say code. Anytime you require visual assistance, say video call. Simply say logout to get logged out from your account.", TextToSpeech.QUEUE_ADD, null);
                   t1.speak("Swipe left to listen again and swipe right to say something.", TextToSpeech.QUEUE_ADD, null);
                 }
                 return true;
               }
             }
 
+            else{
+              if(Math.abs(yDiff) > threshold && Math.abs(velocityY) > velocity_threshold){
+                if(yDiff>0){
+                  // textView.setText("swiped down");
+                  obj=" ";
+                  t1.stop();
+                }
+                else{
+                  //  textView.setText("swiped up");
+
+                }
+                return true;
+              }
+            }
           }catch (Exception e){
             e.printStackTrace();
           }
@@ -335,21 +356,27 @@ public abstract class CameraActivity extends AppCompatActivity
                   intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "What do you want to detect");
                   if (intent.resolveActivity(getPackageManager()) != null) {
                     startActivityForResult(intent, 30);
+                    new Handler().postDelayed(new Runnable() {
+                      @Override
+                      public void run() {
+                        finishActivity(30);
+                      }
+                    },5000);
                   } else {
                     t1.speak("Your device does not support speech input", TextToSpeech.QUEUE_ADD, null);
                   }
                     }
                   }, 2000);
                 }
-              }, 4000);
+              }, 3000);
                   break;
 
             case "video call":
               t1.speak("who do you want to call? Tell me the number for the respective volunteer when i say start speaking", TextToSpeech.QUEUE_ADD, null);
               //Toast.makeText(this, Alist.get(0).getUserName(), Toast.LENGTH_SHORT).show();
               if(!Alist.isEmpty()){
-              for (Users vol : Alist) {
                 int i = 1;
+              for (Users vol : Alist) {
                 t1.speak("say"+ i + "for" + vol.getUserName(), TextToSpeech.QUEUE_ADD, null);
                 i++;
               }}else{
@@ -366,6 +393,12 @@ public abstract class CameraActivity extends AppCompatActivity
                       intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "tell the number");
                       if (intent.resolveActivity(getPackageManager()) != null) {
                         startActivityForResult(intent, 20);
+                        new Handler().postDelayed(new Runnable() {
+                          @Override
+                          public void run() {
+                            finishActivity(20);
+                          }
+                        },5000);
 
                       } else {
                         t1.speak("Your device does not support speech input", TextToSpeech.QUEUE_ADD, null);
@@ -374,6 +407,7 @@ public abstract class CameraActivity extends AppCompatActivity
                   }, 2000);
                 }
               }, 9000);
+              break;
 
             case "code":
               t1.speak("Your Assistance code is :"+bcode.toString(), TextToSpeech.QUEUE_ADD, null);
@@ -393,17 +427,22 @@ public abstract class CameraActivity extends AppCompatActivity
           t1.speak("Calling"+Alist.get(num).getUserName(), TextToSpeech.QUEUE_ADD, null);
           intent.putExtra("vol",id);
           startActivity(intent);
+          break;
 
       case 30:
        obj = result.get(0);
-        for(int i=0; i<=labels.length;i++){
+          try{
+            for(int i=0; i<=labels.length;i++){
           if(obj.equals(labels[i])){
-            t1.speak("detecting "+obj, TextToSpeech.QUEUE_ADD, null);
+
+            t1.speak("detecting "+obj+"if you want to stop detection swipe down", TextToSpeech.QUEUE_ADD, null);
             break;
+          } }
+          }catch(Exception e){
+             t1.speak("I cannot detect a "+obj, TextToSpeech.QUEUE_ADD, null);
           }
-        }
-        t1.speak("I cannot detect a "+obj, TextToSpeech.QUEUE_ADD, null);
           break;
+
 
       default:
         t1.speak("Sorry! I didn't understand what you said. Swipe left to listen the features.", TextToSpeech.QUEUE_ADD, null);
@@ -477,7 +516,6 @@ public abstract class CameraActivity extends AppCompatActivity
     }
 
   }
-
 
   //TensorFlow Api Detection and Camera Code
   protected int[] getRgbBytes() {
@@ -616,12 +654,12 @@ public abstract class CameraActivity extends AppCompatActivity
   @Override
   public synchronized void onPause() {
     LOGGER.d("onPause " + this);
-
     handlerThread.quitSafely();
     try {
       handlerThread.join();
       handlerThread = null;
       handler = null;
+
     } catch (final InterruptedException e) {
       LOGGER.e(e, "Exception!");
     }
