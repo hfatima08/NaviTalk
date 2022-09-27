@@ -266,7 +266,7 @@ public class CallActivity extends AppCompatActivity
                                 }
                                 else{
 //                                    textView.setText("swiped left");
-                                    t1.speak("when you want to end your call,Swipre right.",TextToSpeech.QUEUE_ADD, null);
+                                    t1.speak("when you want to end your call,Swipe right.",TextToSpeech.QUEUE_ADD, null);
                                 }
                                 return true;
                             }
