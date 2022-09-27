@@ -115,10 +115,10 @@ public class EditProfileFragment extends Fragment {
 //                                });
 
                             }
-                        }else{
+                        else{
                             Toast.makeText(getContext(), "ERROR: User Name cannot be Empty!", Toast.LENGTH_SHORT).show();
                         }
-                        }
+                        }}
 
                     @Override
                     public void onCancelled(DatabaseError databaseError) {

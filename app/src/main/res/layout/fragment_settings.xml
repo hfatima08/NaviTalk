@@ -19,160 +19,161 @@
         android:gravity="center_horizontal"
         >
 
-    <RelativeLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center_vertical"
-        >
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:layout_gravity="center_vertical"
+            >
 
-        <TextView
-            android:id="@+id/EditProfile"
-            android:layout_width="129dp"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:text="Edit Profile"
-            android:textAlignment="center"
-            android:textColor="@color/colorpurple"
-            android:textSize="20dp"
-            android:textStyle="bold"
-            android:enabled="true"
-            android:clickable="true"/>
-        <View
-            android:id="@+id/l1"
-            android:layout_width="350dp"
-            android:layout_height="2dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="40sp"
-            android:background="#DCDCDC" />
+            <TextView
+                android:id="@+id/EditProfile"
+                android:layout_width="129dp"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="Edit Profile"
+                android:textAlignment="center"
+                android:textColor="@color/colorpurple"
+                android:textSize="20dp"
+                android:textStyle="bold"
+                android:enabled="true"
+                android:clickable="true"/>
+            <View
+                android:id="@+id/l1"
+                android:layout_width="300dp"
+                android:layout_height="2dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="40sp"
+                android:background="#DCDCDC" />
 
-        <TextView
-            android:id="@+id/Lang"
-            android:layout_width="126dp"
-            android:layout_height="30dp"
-            android:gravity="center_horizontal"
-            android:text="Language"
-            android:textAlignment="center"
-            android:textColor="@color/colorpurple"
-            android:textStyle="bold"
-            android:layout_marginTop="10dp"
-            android:layout_below="@+id/l1"
-            android:textSize="20dp"/>
+            <TextView
+                android:id="@+id/Lang"
+                android:layout_width="126dp"
+                android:layout_height="40dp"
+                android:gravity="center_horizontal"
+                android:text="Language"
+                android:textAlignment="center"
+                android:textColor="@color/colorpurple"
+                android:textStyle="bold"
+                android:layout_marginTop="10dp"
+                android:layout_below="@+id/l1"
+                android:textSize="20dp"/>
 
-        <TextView
-            android:id="@+id/eng"
-            android:layout_width="129dp"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:text="English"
-            android:layout_below="@id/Lang"
-            android:textAlignment="center"
-            android:textColor="#340B100F"
-            android:textSize="17dp"/>
+            <TextView
+                android:id="@+id/eng"
+                android:layout_width="129dp"
+                android:layout_height="wrap_content"
+                android:gravity="center_horizontal"
+                android:text="English"
+                android:layout_below="@id/Lang"
+                android:textAlignment="center"
+                android:textColor="#340B100F"
+                android:textSize="17dp"/>
 
-        <View
-            android:id="@+id/l2"
-            android:layout_width="350dp"
-            android:layout_height="2dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="120sp"
-            android:background="#DCDCDC" />
+            <View
+                android:id="@+id/l2"
+                android:layout_width="300dp"
+                android:layout_height="2dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="130sp"
+                android:background="#DCDCDC" />
 
 
-        <TextView
-            android:id="@+id/connect"
-            android:layout_width="173dp"
-            android:layout_height="40dp"
-            android:gravity="center_horizontal"
-            android:text="Connect with us"
-            android:textAlignment="center"
-            android:textColor="@color/colorpurple"
-            android:layout_below="@id/l2"
-            android:textStyle="bold"
-            android:layout_marginTop="10dp"
-            android:textSize="20dp"/>
+            <TextView
+                android:id="@+id/connect"
+                android:layout_width="173dp"
+                android:layout_height="40dp"
+                android:gravity="center_horizontal"
+                android:text="Connect with us"
+                android:textAlignment="center"
+                android:textColor="@color/colorpurple"
+                android:layout_below="@id/l2"
+                android:textStyle="bold"
+                android:layout_marginTop="10dp"
+                android:textSize="20dp"/>
 
-        <ImageView
-            android:id="@+id/imagefb"
-            android:layout_width="82dp"
-            android:layout_height="40dp"
-            android:src="@drawable/facebook2"
-            android:layout_marginBottom="20dp"
-            android:layout_below="@id/connect"/>
+            <ImageView
+                android:id="@+id/imagefb"
+                android:layout_width="82dp"
+                android:layout_height="40dp"
+                android:src="@drawable/facebook2"
+                android:layout_marginBottom="20dp"
+                android:layout_below="@id/connect"/>
 
-        <TextView
-            android:id="@+id/fb"
-            android:layout_width="85dp"
-            android:layout_height="60dp"
-            android:gravity="center_horizontal"
-            android:layout_marginTop="10dp"
-            android:layout_toRightOf="@id/imagefb"
-            android:layout_below="@id/connect"
-            android:text="Facebook"
+            <TextView
+                android:id="@+id/fb"
+                android:layout_width="85dp"
+                android:layout_height="60dp"
+                android:gravity="center_horizontal"
+                android:layout_marginTop="10dp"
+                android:layout_toRightOf="@id/imagefb"
+                android:layout_below="@id/connect"
+                android:text="Facebook"
 
-            android:textColor="@color/colorblack"
-            android:textSize="18dp" />
+                android:textColor="@color/colorblack"
+                android:textSize="18dp" />
 
-        <ImageView
-            android:id="@+id/imageinsta"
-            android:layout_width="82dp"
-            android:layout_height="40dp"
-            android:src="@drawable/insta"
-            android:layout_below="@id/imagefb"/>
+            <ImageView
+                android:id="@+id/imageinsta"
+                android:layout_width="82dp"
+                android:layout_height="40dp"
+                android:src="@drawable/insta"
+                android:layout_below="@id/imagefb"/>
 
-        <TextView
-            android:id="@+id/insta"
-            android:layout_width="100dp"
-            android:layout_height="40dp"
-            android:gravity="center_horizontal"
-            android:text="Instagram"
-            android:textAlignment="center"
-            android:textColor="@color/colorblack"
-            android:textSize="18dp"
-            android:layout_below="@id/fb"
-            android:layout_toRightOf="@id/imageinsta"/>
+            <TextView
+                android:id="@+id/insta"
+                android:layout_width="100dp"
+                android:layout_height="40dp"
+                android:gravity="center_horizontal"
+                android:text="Instagram"
+                android:textAlignment="center"
+                android:textColor="@color/colorblack"
+                android:textSize="18dp"
+                android:layout_below="@id/fb"
+                android:layout_toRightOf="@id/imageinsta"/>
 
-        <View
-            android:id="@+id/l3"
-            android:layout_width="350dp"
-            android:layout_height="2dp"
-            android:layout_gravity="center"
-            android:layout_marginTop="290sp"
-            android:background="#DCDCDC" />
+            <View
+                android:id="@+id/l3"
+                android:layout_width="300dp"
+                android:layout_height="2dp"
+                android:layout_gravity="center"
+                android:layout_marginTop="300sp"
+                android:background="#DCDCDC" />
 
-        <ImageView
-            android:id="@+id/imageshare"
-            android:layout_width="82dp"
-            android:layout_height="40dp"
-            android:layout_marginTop="10dp"
-            android:src="@drawable/share"
-            android:layout_below="@id/l3"/>
+            <ImageView
+                android:id="@+id/imageshare"
+                android:layout_width="82dp"
+                android:layout_height="40dp"
+                android:layout_marginTop="10dp"
+                android:src="@drawable/share"
+                android:layout_below="@id/l3"/>
 
-        <TextView
-            android:id="@+id/textView11"
-            android:layout_width="70dp"
-            android:layout_height="40dp"
-            android:gravity="center_horizontal"
-            android:text="Share"
-            android:layout_marginTop="20dp"
-            android:textColor="@color/colorblack"
-            android:textSize="18dp"
-            android:layout_below="@id/l3"
-            android:layout_toRightOf="@id/imageshare"/>
+            <TextView
+                android:id="@+id/textView11"
+                android:layout_width="70dp"
+                android:layout_height="40dp"
+                android:gravity="center_horizontal"
+                android:text="Share"
+                android:layout_marginTop="20dp"
+                android:textColor="@color/colorblack"
+                android:textSize="18dp"
+                android:layout_below="@id/l3"
+                android:layout_toRightOf="@id/imageshare"/>
 
-        <Button
-            android:id="@+id/btn_logout"
-            android:layout_width="350dp"
-            android:layout_height="60dp"
-            android:layout_marginTop="60dp"
-            android:backgroundTint="@color/colorpurple"
-            android:drawableLeft="@drawable/ic_baseline_logout_24"
-            android:layout_centerInParent="true"
-            android:text="Logout"
-            android:textColor="@color/white"
-            android:layout_below="@id/imageshare"/>
+            <Button
+                android:id="@+id/btn_logout"
+                android:layout_width="300dp"
+                android:layout_height="55dp"
+                android:layout_marginTop="30dp"
+                android:backgroundTint="@color/colorpurple"
+                android:drawableLeft="@drawable/ic_baseline_logout_24"
+                android:layout_centerInParent="true"
+                android:text="Logout"
+                android:textColor="@color/white"
+                android:layout_below="@id/imageshare"/>
 
-    </RelativeLayout>
 
-        </LinearLayout>
+        </RelativeLayout>
+
+    </LinearLayout>
 </LinearLayout>
 

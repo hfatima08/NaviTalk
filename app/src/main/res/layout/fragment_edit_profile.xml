@@ -24,13 +24,13 @@
             android:text="Edit Your Profile"
             android:textAlignment="center"
             android:textColor="@color/colorpurple"
-            android:textSize="25dp"
+            android:textSize="24dp"
             android:textStyle="bold"
            />
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="350dp"
+            android:layout_width="300dp"
             android:layout_height="90dp"
             app:startIconDrawable="@drawable/ic_baseline_account_circle_24"
             android:hint="User Name"
@@ -39,14 +39,14 @@
             >
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/usernameTF"
-                android:layout_width="350dp"
+                android:layout_width="300dp"
                 android:layout_height="55dp"
                 />
         </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="350dp"
+        android:layout_width="300dp"
         android:layout_height="90dp"
         app:startIconDrawable="@drawable/ic_email"
         android:hint="Email"
@@ -57,14 +57,14 @@
         >
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/emailTF"
-            android:layout_width="350dp"
+            android:layout_width="300dp"
             android:layout_height="55dp"
             />
     </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="350dp"
+            android:layout_width="300dp"
             android:layout_height="90dp"
             app:startIconDrawable="@drawable/code"
             android:hint="Assistance Code"
@@ -73,7 +73,7 @@
             >
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/codeTF"
-                android:layout_width="350dp"
+                android:layout_width="300dp"
                 android:layout_height="55dp"
                 android:inputType="numberDecimal"
                 />
@@ -81,8 +81,8 @@
 
         <Button
             android:id="@+id/update"
-            android:layout_width="350dp"
-            android:layout_height="60dp"
+            android:layout_width="300dp"
+            android:layout_height="55dp"
             android:layout_marginTop="50dp"
             android:backgroundTint="@color/colorpurple"
             android:drawableLeft="@drawable/ic_update"

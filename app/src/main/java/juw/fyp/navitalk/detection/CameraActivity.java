@@ -404,7 +404,7 @@ public abstract class CameraActivity extends AppCompatActivity
                         t1.speak("Your device does not support speech input", TextToSpeech.QUEUE_ADD, null);
                       }
                     }
-                  }, 2000);
+                  }, 1000);
                 }
               }, 9000);
               break;
