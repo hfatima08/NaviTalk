@@ -57,12 +57,7 @@ public class HomeFragment extends Fragment {
 
         startAnimation();
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                ReceiveCall();
-            }
-        }, 4000);
+
 
         return view;
     }
@@ -86,57 +81,6 @@ public class HomeFragment extends Fragment {
             });
 
     }
-
-    public void ReceiveCall() {
-
-        ref.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
-                if (snapshot.child(userId).hasChild("Ringing")) {
-
-                    Query refer = ref.orderByChild("Calling");
-                    refer.addChildEventListener(new ChildEventListener() {
-                        @Override
-                        public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-                            String Bid = snapshot.getKey();
-
-                                Intent intent = new Intent(getContext(), ConnectingActivity2.class);
-                                intent.putExtra("BId", Bid);
-                                startActivity(intent);
-                            }
-
-
-                        @Override
-                        public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                        }
-
-                        @Override
-                        public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-
-                        }
-
-                        @Override
-                        public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError error) {
-
-                        }
-                    });
-                    //end
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-
-            }
-        });
-    }
-
 
     private void startAnimation() {
         Animation zoomin =new TranslateAnimation(1, 1, 0, -50);
