@@ -206,7 +206,7 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
                                     startActivity(intent1);
                                 } else {
                                     //     textView.setText("swiped left");
-                                    t1.speak("If you want to login as a blind person swipe right", TextToSpeech.QUEUE_ADD, null);
+                                    t1.speak("You can only login with your g-mail account. Swipe up for available accounts.", TextToSpeech.QUEUE_ADD, null);
 
                                 }
                                 return true;

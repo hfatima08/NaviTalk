@@ -61,7 +61,7 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
   private static final String TF_OD_API_LABELS_FILE = "labelmap.txt";
   private static final DetectorMode MODE = DetectorMode.TF_OD_API;
   // Minimum detection confidence to track a detection.
-  private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.6f;
+  private static final float MINIMUM_CONFIDENCE_TF_OD_API = 0.5f;
   private static final boolean MAINTAIN_ASPECT = false;
   private static final Size DESIRED_PREVIEW_SIZE = new Size(640, 480);
   private static final boolean SAVE_PREVIEW_BITMAP = false;
@@ -80,7 +80,8 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
   private MultiBoxTracker tracker;
   private BorderedText borderedText;
 
-  String detected="";
+  boolean detected=false;
+
 
   @Override
   public void onPreviewSizeChosen(final Size size, final int rotation) {
@@ -146,14 +147,6 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
 
     tracker.setFrameConfiguration(previewWidth, previewHeight, sensorOrientation);
   }
-//
-//  public void onPause(){
-//    if(t1 !=null){
-//      t1.stop();
-//      t1.shutdown();
-//    }
-//    super.onPause();
-//  }
 
   @Override
   protected void processImage(String obj) {
@@ -163,15 +156,16 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
 
     // No mutex needed as this method is not reentrant.
     if (computingDetection) {
-      readyForNextImage();
+     readyForNextImage();
       return;
     }
     computingDetection = true;
+
     LOGGER.i("Preparing image " + currTimestamp + " for detection in bg thread.");
 
     rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
 
-    readyForNextImage();
+   readyForNextImage();
 
     final Canvas canvas = new Canvas(croppedBitmap);
     canvas.drawBitmap(rgbFrameBitmap, frameToCropTransform, null);
@@ -184,9 +178,10 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
         new Runnable() {
           @Override
           public void run() {
-            LOGGER.i("Running detection on image " + currTimestamp);
+           LOGGER.i("Running detection on image " + currTimestamp);
             final long startTime = SystemClock.uptimeMillis();
             final List<Detector.Recognition> results = detector.recognizeImage(croppedBitmap);
+          //  String results = detector.recognizeImage(croppedBitmap);
             lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
 
             cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
@@ -206,27 +201,28 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
             final List<Detector.Recognition> mappedRecognitions =
                 new ArrayList<Detector.Recognition>();
 
-            for (final Detector.Recognition result : results) {
+           for (final Detector.Recognition result : results) {
+           // for(int i=0; i<=results.size();i++) {
+             // Detector.Recognition result = results.get(i);
               final RectF location = result.getLocation();
               if (location != null && result.getConfidence() >= minimumConfidence && result.getTitle().equals(obj)) {
                 canvas.drawRect(location, paint);
                 cropToFrameTransform.mapRect(location);
-
                 result.setLocation(location);
+                // Toast.makeText(DetectorActivity.this, (int) location.width(), Toast.LENGTH_SHORT).show();
                 mappedRecognitions.add(result);
-                t1.speak(obj+"detected.",TextToSpeech.QUEUE_ADD, null);
+                 t1.speak(obj + "detected", TextToSpeech.QUEUE_ADD, null);
+                  break;
               }
-
             }
 
-            tracker.trackResults(mappedRecognitions, currTimestamp);
+         tracker.trackResults(mappedRecognitions, currTimestamp);
             trackingOverlay.postInvalidate();
-
             computingDetection = false;
 
-
-
-
+//            if(!obj.equals(null)) {
+//                t1.speak(obj + "detected", TextToSpeech.QUEUE_FLUSH, null);
+//            }
 
           }
         });

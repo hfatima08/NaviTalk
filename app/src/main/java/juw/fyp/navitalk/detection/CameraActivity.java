@@ -97,10 +97,10 @@ public abstract class CameraActivity extends AppCompatActivity
   RecyclerView rv;
   RelativeLayout relativeLayout;
   SwipeListener swipeListener;
-  TextToSpeech t1;
+  public TextToSpeech t1;
   DatabaseReference reference;
   Long bcode;
-  String uid,obj;
+  String uid,obj=null;
   String[] labels = {"person","bicycle","car", "motorcycle","airplane","bus","train","truck", "boat","traffic light", "fire hydrant","stop sign","parking meter", "bench",
           "bird","cat","dog","horse","sheep","cow","elephant", "bear","zebra", "giraffe","backpack","umbrella","handbag","tie","suitcase","frisbee","skis","snowboard","sports ball",
           "kite", "baseball bat","baseball glove","skateboard","surfboard","tennis racket","bottle","wine glass","cup","fork","knife","spoon","bowl" ,"banana","apple",
@@ -265,6 +265,8 @@ public abstract class CameraActivity extends AppCompatActivity
               if(Math.abs(xDiff) > threshold && Math.abs(velocityX) > velocity_threshold){
                 if(xDiff>0){
                   //textView.setText("swiped right");
+                  t1.speak(" ",TextToSpeech.QUEUE_FLUSH,null);
+
                   t1.speak("Start speaking",TextToSpeech.QUEUE_ADD, null);
                   new Handler().postDelayed(new Runnable() {
                     @Override
@@ -625,7 +627,7 @@ public abstract class CameraActivity extends AppCompatActivity
             }
           };
 
-     processImage(obj);
+    // processImage(obj);
     } catch (final Exception e) {
       LOGGER.e(e, "Exception!");
       Trace.endSection();

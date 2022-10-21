@@ -24,22 +24,28 @@ import android.graphics.Paint.Cap;
 import android.graphics.Paint.Join;
 import android.graphics.Paint.Style;
 import android.graphics.RectF;
+import android.speech.tts.TextToSpeech;
 import android.text.TextUtils;
 import android.util.Pair;
 import android.util.TypedValue;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Queue;
 
+import juw.fyp.navitalk.detection.CameraActivity;
+import juw.fyp.navitalk.detection.DetectorActivity;
 import juw.fyp.navitalk.detection.env.BorderedText;
 import juw.fyp.navitalk.detection.env.ImageUtils;
 import juw.fyp.navitalk.detection.env.Logger;
 import juw.fyp.navitalk.detection.tflite.Detector.Recognition;
 
+import static com.vonage.webrtc.ContextUtils.getApplicationContext;
+
 
 /** A tracker that handles non-max suppression and matches existing objects to new detections. */
-public class MultiBoxTracker {
+public  class MultiBoxTracker extends DetectorActivity {
   private static final float TEXT_SIZE_DIP = 18;
   private static final float MIN_SIZE = 16.0f;
   private static final int[] COLORS = {
@@ -70,6 +76,8 @@ public class MultiBoxTracker {
   private int frameWidth;
   private int frameHeight;
   private int sensorOrientation;
+
+
 
   public MultiBoxTracker(final Context context) {
     for (final int color : COLORS) {
@@ -116,6 +124,7 @@ public class MultiBoxTracker {
 
   public synchronized void trackResults(final List<Recognition> results, final long timestamp) {
     logger.i("Processing %d results from %d", results.size(), timestamp);
+
     processResults(results);
   }
 
@@ -154,6 +163,7 @@ public class MultiBoxTracker {
       // labelString);
       borderedText.drawText(
           canvas, trackedPos.left + cornerSize, trackedPos.top, labelString + "%", boxPaint);
+
     }
   }
 
@@ -183,6 +193,8 @@ public class MultiBoxTracker {
       }
 
       rectsToTrack.add(new Pair<Float, Recognition>(result.getConfidence(), result));
+
+
     }
 
     trackedObjects.clear();
@@ -210,5 +222,6 @@ public class MultiBoxTracker {
     float detectionConfidence;
     int color;
     String title;
+
   }
 }
