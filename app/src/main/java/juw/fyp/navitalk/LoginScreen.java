@@ -9,10 +9,13 @@ import android.accounts.Account;
 import android.accounts.AccountManager;
 import android.content.ClipData;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.RecognizerIntent;
 import android.speech.tts.TextToSpeech;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
@@ -20,6 +23,7 @@ import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.TranslateAnimation;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -46,21 +50,26 @@ import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.Random;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import juw.fyp.navitalk.detection.DetectorActivity;
 import juw.fyp.navitalk.models.Users;
 
-public class LoginScreen extends AppCompatActivity implements View.OnClickListener {
+public class LoginScreen extends AppCompatActivity {
     ImageView img;
-    Button login;
+    Button login,submit;
+    EditText name;
+    TextInputEditText code;
     GoogleSignInClient signInClient;
     GoogleSignInOptions signInOptions;
     FirebaseAuth auth;
     FirebaseDatabase database;
     FirebaseUser user;
-    String str;
+    String str,userName="",cmd="";
     Users users = new Users();
     AlertDialog dialog;
     LinearLayout linearLayout;
@@ -68,98 +77,53 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
     TextToSpeech t1;
     Intent intent;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login_screen);
 
+        //id assigned
         img = findViewById(R.id.img);
         login = findViewById(R.id.btn_login);
         linearLayout = findViewById(R.id.linearlayout);
+        name = findViewById(R.id.usernameTF);
 
-        login.setOnClickListener(this);
 
+        //Login onclick method call
+        login.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                SignIn();
+            }
+        });
+                //firebase
         auth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
 
+        //google signin
         signInOptions= new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
                 .requestIdToken(getString(R.string.default_web_client_id))
                 .requestEmail()
                 .build();
         signInClient = GoogleSignIn.getClient(this,signInOptions);
 
+        //start image animation
+        startAnimation();
 
-        //Image Animation start
-        Animation zoomin =new TranslateAnimation(1, 1, 0, -50);
-        zoomin.setDuration(1000);
-        zoomin.setFillEnabled(true);
-        zoomin.setFillAfter(true);
-
-        Animation zoomout =  new TranslateAnimation(1, 1, -50, 0);
-        zoomout.setDuration(1000);
-        zoomout.setFillEnabled(true);
-        zoomout.setFillAfter(true);
-
-        img.startAnimation(zoomin);
-
-        zoomin.setAnimationListener(new Animation.AnimationListener() {
-
-            @Override
-            public void onAnimationStart(Animation arg0) {
-                // TODO Auto-generated method stub
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation arg0) {
-                // TODO Auto-generated method stub
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation arg0) {
-                img.startAnimation(zoomout);
-            }
-        });
-
-        zoomout.setAnimationListener(new Animation.AnimationListener() {
-
-            @Override
-            public void onAnimationStart(Animation arg0) {
-                // TODO Auto-generated method stub
-
-            }
-
-            @Override
-            public void onAnimationRepeat(Animation arg0) {
-                // TODO Auto-generated method stub
-
-            }
-
-            @Override
-            public void onAnimationEnd(Animation arg0) {
-
-                img.startAnimation(zoomin);
-
-
-            }
-        });
-        // end image animation
-
-
+        //swipe gesture
         swipeListener = new SwipeListener(linearLayout);
 
+        //voice integration
         t1 = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
                 if (status != TextToSpeech.ERROR) {
                     t1.setLanguage(Locale.US);
-                    t1.speak("You are on the login screen, You can only login with your g-mail account. Swipe up for available accounts.", TextToSpeech.QUEUE_FLUSH, null);
+                    t1.speak("You are on the login screen, You can only login with your g-mail account. Swipe up for available accounts. ", TextToSpeech.QUEUE_FLUSH, null);
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            t1.speak("swipe left to listen again", TextToSpeech.QUEUE_ADD, null);
+                            t1.speak("swipe left to listen again", TextToSpeech.QUEUE_ADD,null, null);
                         }
                     }, 1000);
                 }
@@ -169,16 +133,12 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
         intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
+
+
     }//end oncreate
 
-    public void onPause(){
-        if(t1 !=null){
-            t1.stop();
-            t1.shutdown();
-        }
-        super.onPause();
-    }
 
+   // Swipe Gesture code
     private class SwipeListener implements View.OnTouchListener {
         GestureDetector gestureDetector;
 
@@ -201,13 +161,9 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
                             if (Math.abs(xDiff) > threshold && Math.abs(velocityX) > velocity_threshold) {
                                 if (xDiff > 0) {
                                     //textView.setText("swiped right");
-                                    Intent intent1 = new Intent(getApplicationContext(), LoginScreen.class);
-                                    intent1.putExtra("Role", "blind");
-                                    startActivity(intent1);
-                                } else {
+                                    } else {
                                     //     textView.setText("swiped left");
-                                    t1.speak("You can only login with your g-mail account. Swipe up for available accounts.", TextToSpeech.QUEUE_ADD, null);
-
+                                    t1.speak("You are on the login screen, You can only login with your g-mail account. Swipe up for available accounts.", TextToSpeech.QUEUE_ADD, null);
                                 }
                                 return true;
                             }
@@ -220,7 +176,7 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
                                 }
                                 else{
                                   //  textView.setText("swiped up");
-                                    SignIn();
+                                 SignIn();
                                 }
                                 return true;
                             }
@@ -234,7 +190,6 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
             };
 
             gestureDetector = new GestureDetector(listener);
-
             view.setOnTouchListener(this);
         }
 
@@ -245,16 +200,18 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
 
     }
 
-    //Google SignIn Start
-    @Override
-    public void onClick(View view) {
-        SignIn();
-    }
+//   // Google SignIn Start
+//    @Override
+//    public void onClick(View view) {
+//        SignIn();
+//    }
+
+
 
     private void SignIn() {
         Intent intent = signInClient.getSignInIntent();
         startActivityForResult(intent,100);
-        t1.speak(signInOptions.getExtensions().toString(), TextToSpeech.QUEUE_ADD, null);
+  //      t1.speak(signInOptions.getExtensions().toString(), TextToSpeech.QUEUE_ADD, null);
     }
 
     @Override
@@ -327,7 +284,8 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
              }else{
                 users.setRole("Blind User");
                 Long code = getRandom();
-                users.setCode(code);}
+            //    users.setCode(code);
+            }
     }
 
 
@@ -340,22 +298,24 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
     private void BlindActivity() {
         finish();
         Intent intent = new Intent(getApplicationContext(), DetectorActivity.class);
+        intent.putExtra("userName", userName);
         startActivity(intent);
     }
 
     //Google Signin End
 
-    //random number
+    //random number for blind assistance code
     public Long getRandom() {
         // It will generate 6 digit random Number.
         // from 0 to 999999
         Random rnd = new Random();
-        int number = rnd.nextInt(999999);
+        int number = rnd.nextInt(999999 );
 
         // this will convert any number sequence into 6 character.
         return Long.parseLong(String.format("%06d", number));
     }
 
+//Signout if user is already logged-in as a different role
     private void SignOut(){
         signInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
@@ -374,14 +334,15 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
         rootRef.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
-                Boolean role = dataSnapshot.getValue().toString().contains("Blind User");
-                if(role.equals(false) && str.equals("volunteer")){
+                String role = dataSnapshot.getValue().toString();
+                if( str.equals("volunteer") && role.equals("Volunteer")){
                   VolunteerActivity();
-                }else if(role.equals(true) && str.equals("blind")){
+                }else if(str.equals("blind") && role.equals("Blind User")){
                     BlindActivity();
                 }else{
                     Toast.makeText(LoginScreen.this, "This User is already registered as a "+str+"!", Toast.LENGTH_SHORT).show();
-                    SignOut();
+                     SignOut();
+
                 }
             }
             @Override
@@ -399,23 +360,24 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
         dialog = builder.create();
         dialog.show();
 
-         TextInputEditText code = view.findViewById(R.id.code);
-        Button submit = view.findViewById(R.id.submit);
+        code = view.findViewById(R.id.code);
+        submit = view.findViewById(R.id.submit);
 
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 Long num = Long.parseLong(code.getText().toString());
                 DatabaseReference ref=FirebaseDatabase.getInstance().getReference().child("Users");
-                ref.orderByChild("code").equalTo(num).addValueEventListener(new ValueEventListener() {
+                ref.orderByChild("code").equalTo(num).addListenerForSingleValueEvent(new ValueEventListener() {
                     @Override
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (dataSnapshot.exists()) {
                                 Boolean role = dataSnapshot.getValue().toString().contains("Blind User");
                                  if (role.equals(true)) {
-                                            users.setCode(num);
-                                            database.getReference().child("Users").child(user.getUid()).setValue(users);
-                                            OpenActivity();
+                                       //     users.setCode(num);
+                                     Toast.makeText(LoginScreen.this, users.getUserName(), Toast.LENGTH_SHORT).show();
+                                     database.getReference().child("Users").child(user.getUid()).setValue(users);
+                                           OpenActivity();
                                         }
                                 }
                         else {
@@ -431,5 +393,73 @@ public class LoginScreen extends AppCompatActivity implements View.OnClickListen
         });
 
    }
+
+    //Image Animation
+    private void startAnimation() {
+        Animation zoomin =new TranslateAnimation(1, 1, 0, -50);
+        zoomin.setDuration(1000);
+        zoomin.setFillEnabled(true);
+        zoomin.setFillAfter(true);
+
+        Animation zoomout =  new TranslateAnimation(1, 1, -50, 0);
+        zoomout.setDuration(1000);
+        zoomout.setFillEnabled(true);
+        zoomout.setFillAfter(true);
+
+        img.startAnimation(zoomin);
+
+        zoomin.setAnimationListener(new Animation.AnimationListener() {
+
+            @Override
+            public void onAnimationStart(Animation arg0) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation arg0) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation arg0) {
+                img.startAnimation(zoomout);
+            }
+        });
+
+        zoomout.setAnimationListener(new Animation.AnimationListener() {
+
+            @Override
+            public void onAnimationStart(Animation arg0) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation arg0) {
+                // TODO Auto-generated method stub
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation arg0) {
+
+                img.startAnimation(zoomin);
+
+
+            }
+
+        });
+    }
+
+    //Stop voice when the activity is paused
+    public void onPause(){
+        if(t1 !=null){
+            t1.stop();
+          //  t1.shutdown();
+        }
+        super.onPause();
+    }
 
 }//end class

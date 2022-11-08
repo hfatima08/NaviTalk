@@ -80,9 +80,9 @@
             android:layout_width="320dp"
             android:layout_height="55dp"
             android:backgroundTint="@color/colorpurple"
-            android:drawableLeft="@drawable/ic_baseline_logout_24"
+            android:drawableLeft="@drawable/ic_delete"
             android:layout_gravity="center_horizontal"
-            android:text="Logout"
+            android:text="Delete Account"
             android:layout_margin="10dp"
             android:textColor="#FAFAFD"
             />

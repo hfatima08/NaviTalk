@@ -67,4 +67,5 @@ dependencies {
     //videocall
     implementation 'com.opentok.android:opentok-android-sdk:2.22.3'
     implementation 'pub.devrel:easypermissions:3.0.0'
+
 }

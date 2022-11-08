@@ -39,7 +39,7 @@
                 android:clickable="true"/>
             <View
                 android:id="@+id/l1"
-                android:layout_width="300dp"
+                android:layout_width="350dp"
                 android:layout_height="2dp"
                 android:layout_gravity="center"
                 android:layout_marginTop="40sp"
@@ -71,7 +71,7 @@
 
             <View
                 android:id="@+id/l2"
-                android:layout_width="300dp"
+                android:layout_width="350dp"
                 android:layout_height="2dp"
                 android:layout_gravity="center"
                 android:layout_marginTop="130sp"
@@ -133,7 +133,7 @@
 
             <View
                 android:id="@+id/l3"
-                android:layout_width="300dp"
+                android:layout_width="350dp"
                 android:layout_height="2dp"
                 android:layout_gravity="center"
                 android:layout_marginTop="300sp"
@@ -161,13 +161,13 @@
 
             <Button
                 android:id="@+id/btn_logout"
-                android:layout_width="300dp"
+                android:layout_width="350dp"
                 android:layout_height="55dp"
-                android:layout_marginTop="30dp"
+                android:layout_marginTop="60dp"
                 android:backgroundTint="@color/colorpurple"
-                android:drawableLeft="@drawable/ic_baseline_logout_24"
+                android:drawableLeft="@drawable/ic_delete"
                 android:layout_centerInParent="true"
-                android:text="Logout"
+                android:text="Delete Account"
                 android:textColor="@color/white"
                 android:layout_below="@id/imageshare"/>
 

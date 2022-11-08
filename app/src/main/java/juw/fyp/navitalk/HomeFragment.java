@@ -1,6 +1,8 @@
 package juw.fyp.navitalk;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -29,6 +31,8 @@ import java.util.ArrayList;
 
 import juw.fyp.navitalk.models.Users;
 
+import static android.content.Context.MODE_PRIVATE;
+
 public class HomeFragment extends Fragment {
     ImageView img;
     TextView volName;
@@ -53,16 +57,15 @@ public class HomeFragment extends Fragment {
         img = view.findViewById(R.id.img);
         volName = view.findViewById(R.id.vol_name);
 
+
        getUsername();
 
         startAnimation();
-
-
-
         return view;
     }
 
     private void getUsername() {
+      //  volName.setText("Hey "+userName+"!");
             DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users/"+userId);
             reference.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override

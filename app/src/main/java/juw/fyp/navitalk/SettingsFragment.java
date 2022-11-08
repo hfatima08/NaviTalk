@@ -1,7 +1,9 @@
 package juw.fyp.navitalk;
 
 import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
 
@@ -16,6 +18,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
@@ -23,6 +26,12 @@ import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 
 public class SettingsFragment extends Fragment {
     private EditProfileFragment editProfile = new EditProfileFragment();
@@ -30,7 +39,10 @@ public class SettingsFragment extends Fragment {
     GoogleSignInClient signInClient;
     GoogleSignInOptions signInOptions;
     FirebaseAuth auth;
+    String uid,userName;
     TextView profile,fb,insta;
+    SharedPreferences sh;
+
     public SettingsFragment() {
         // Required empty public constructor
     }
@@ -48,10 +60,8 @@ public class SettingsFragment extends Fragment {
         insta = view.findViewById(R.id.insta);
 
         auth = FirebaseAuth.getInstance();
-
         signInOptions= new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
         signInClient = GoogleSignIn.getClient(getContext(),signInOptions);
-
 
         SpannableString content = new SpannableString(profile.getText());
         content.setSpan(new UnderlineSpan(), 0, profile.getText().length(), 0);

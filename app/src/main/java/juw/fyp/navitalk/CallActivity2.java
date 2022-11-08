@@ -39,8 +39,8 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
         PublisherKit.PublisherListener {
 
     private static String API_KEY = "47555231";
-    private static String SESSION_ID = "2_MX40NzU1NTIzMX5-MTY2NDE4OTM1ODUyNX5LZ1hCK0IxalRQeHRUVjhIRlFudUhtQ3J-UH4";
-    private static String TOKEN ="T1==cGFydG5lcl9pZD00NzU1NTIzMSZzaWc9YWIwMGZlNTRhZjliMzhjY2U5YjExY2QxOTZhMGRiOTFkZGY2NDY0ZTpzZXNzaW9uX2lkPTJfTVg0ME56VTFOVEl6TVg1LU1UWTJOREU0T1RNMU9EVXlOWDVMWjFoQ0swSXhhbFJRZUhSVVZqaElSbEZ1ZFVodFEzSi1VSDQmY3JlYXRlX3RpbWU9MTY2NDE4OTM3NSZub25jZT0wLjEwMTM2NDEzOTUwNjY2MDIzJnJvbGU9cHVibGlzaGVyJmV4cGlyZV90aW1lPTE2NjY3ODEzNzQmaW5pdGlhbF9sYXlvdXRfY2xhc3NfbGlzdD0=";
+    private static String SESSION_ID = "1_MX40NzU1NTIzMX5-MTY2NzU2ODkyNjg1MX5EcFc4WnpYOCtMVmpFc0FmL3Q3bTQzZnN-fg";
+    private static String TOKEN ="T1==cGFydG5lcl9pZD00NzU1NTIzMSZzaWc9ZGExNDA2ZjgwYjhmODdiZjA1YzgzNjkzOWIwODc3NDQ3YzVmYWE5NjpzZXNzaW9uX2lkPTFfTVg0ME56VTFOVEl6TVg1LU1UWTJOelUyT0RreU5qZzFNWDVFY0ZjNFducFlPQ3RNVm1wRmMwRm1MM1EzYlRRelpuTi1mZyZjcmVhdGVfdGltZT0xNjY3NTY4OTYwJm5vbmNlPTAuNzE1MTk5MDE5NTQ2MTQ1MSZyb2xlPXB1Ymxpc2hlciZleHBpcmVfdGltZT0xNjcwMTYwOTU4JmluaXRpYWxfbGF5b3V0X2NsYXNzX2xpc3Q9";
     private static final String LOG_TAG = CallActivity2.class.getSimpleName();
     private static final int RC_VIDEO_APP_PERM = 124;
 
@@ -59,9 +59,10 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_call2);
 
-        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+      //  userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
         ref = FirebaseDatabase.getInstance().getReference().child("Users");
         BId = getIntent().getStringExtra("BId");
+        userId =  getIntent().getStringExtra("uid");
 
         endCall = findViewById(R.id.endCall);
         name = findViewById(R.id.bname);
@@ -85,13 +86,13 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
         endCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                            ref.child(userId).child("Ringing").removeValue();
-                            ref.child(BId).child("Calling").removeValue();
 
-                            session.unpublish(publisher);
+                ref.child(userId).child("Ringing").removeValue();
+                ref.child(BId).child("Calling").removeValue();
+                session.unpublish(publisher);
 
-                            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-                            finish();
+                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                finish();
 
                                }
         });

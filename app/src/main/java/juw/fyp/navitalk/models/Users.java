@@ -5,17 +5,17 @@ public class Users {
     private String UserName;
     private String mail;
     private String Role;
-    private Long code;
+  //  private Long code;
 
     public Users(){}
 
-    public Long getCode() {
-        return code;
-    }
-
-    public void setCode(Long code) {
-        this.code = code;
-    }
+//    public Long getCode() {
+//        return code;
+//    }
+//
+//    public void setCode(Long code) {
+//        this.code = code;
+//    }
 
     public String getUserId() {
         return UserId;

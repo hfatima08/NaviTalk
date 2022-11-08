@@ -5,6 +5,7 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -28,6 +29,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
@@ -44,7 +46,7 @@ public class ConnectingActivity extends AppCompatActivity {
     FirebaseAuth auth;
     FirebaseDatabase database;
     DatabaseReference reference;
-    String username,checker=" ";
+    String userName,checker=" ",uid;
     ImageView endCall,acceptCall;
     MediaPlayer mediaPlayer;
     String volid=" ";
@@ -67,7 +69,8 @@ public class ConnectingActivity extends AppCompatActivity {
         auth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
         volid = getIntent().getStringExtra("vol");
-        username = auth.getUid();
+        uid = auth.getUid();
+
         reference = FirebaseDatabase.getInstance().getReference("Users");
 
         mediaPlayer = MediaPlayer.create(this,R.raw.ringtone);
@@ -126,7 +129,7 @@ public class ConnectingActivity extends AppCompatActivity {
                 reference.addValueEventListener(new ValueEventListener() {
                     @Override
                     public void onDataChange(@NonNull DataSnapshot snapshot) {
-                        if(!snapshot.child(username).hasChild("Calling") && !snapshot.child(volid).hasChild("Ringing")){
+                        if(!snapshot.child(uid).hasChild("Calling") && !snapshot.child(volid).hasChild("Ringing")){
                             cancelCall();
                         }
                     }
@@ -204,7 +207,7 @@ public class ConnectingActivity extends AppCompatActivity {
                   final HashMap<String, Object> callingInfo = new HashMap<>();
                   callingInfo.put("calling", volid);
 
-                  reference.child(username)
+                  reference.child(uid)
                           .child("Calling")
                           .updateChildren(callingInfo)
                           .addOnCompleteListener(new OnCompleteListener<Void>() {
@@ -212,7 +215,7 @@ public class ConnectingActivity extends AppCompatActivity {
                               public void onComplete(@NonNull Task<Void> task) {
                                   if (task.isSuccessful()) {
                                       final HashMap<String, Object> ringingInfo = new HashMap<>();
-                                      ringingInfo.put("ringing", username);
+                                      ringingInfo.put("ringing", uid);
                                       reference.child(volid)
                                               .child("Ringing")
                                               .updateChildren(ringingInfo);
@@ -237,6 +240,7 @@ public class ConnectingActivity extends AppCompatActivity {
                       mediaPlayer.stop();
                       Intent intent = new Intent(getApplicationContext(), CallActivity.class);
                       intent.putExtra("volId",volid);
+                      intent.putExtra("uid",uid);
                       startActivity(intent);
                   }
               }
@@ -253,7 +257,7 @@ public class ConnectingActivity extends AppCompatActivity {
     private void cancelCall() {
         mediaPlayer.stop();
         reference.child(volid).child("Ringing").removeValue();
-        reference.child(username).child("Calling").removeValue();
+        reference.child(uid).child("Calling").removeValue();
 
         startActivity(new Intent(getApplicationContext(), DetectorActivity.class));
         finish();

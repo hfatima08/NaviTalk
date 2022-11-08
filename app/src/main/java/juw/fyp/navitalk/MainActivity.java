@@ -6,10 +6,13 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
@@ -21,13 +24,15 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import static androidx.camera.core.CameraX.getContext;
+
 public class MainActivity extends AppCompatActivity {
 
     private HomeFragment Home = new HomeFragment();
     private SettingsFragment settings = new SettingsFragment();
     private BottomNavigationView menu;
     DatabaseReference ref;
-    String userId;
+    String userId,userName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -39,7 +44,8 @@ public class MainActivity extends AppCompatActivity {
         menu.setSelectedItemId(R.id.menu_home);
 
         ref = FirebaseDatabase.getInstance().getReference().child("Users");
-        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+       userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+
 
         new Handler().postDelayed(new Runnable() {
             @Override
@@ -72,7 +78,6 @@ public class MainActivity extends AppCompatActivity {
                     }}
             }
         });
-
 
     }
 

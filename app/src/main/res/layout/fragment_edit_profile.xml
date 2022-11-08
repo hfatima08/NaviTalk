@@ -26,11 +26,12 @@
             android:textColor="@color/colorpurple"
             android:textSize="24dp"
             android:textStyle="bold"
+            android:layout_marginTop="20dp"
            />
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="300dp"
+            android:layout_width="350dp"
             android:layout_height="90dp"
             app:startIconDrawable="@drawable/ic_baseline_account_circle_24"
             android:hint="User Name"
@@ -39,14 +40,14 @@
             >
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/usernameTF"
-                android:layout_width="300dp"
+                android:layout_width="350dp"
                 android:layout_height="55dp"
                 />
         </com.google.android.material.textfield.TextInputLayout>
 
     <com.google.android.material.textfield.TextInputLayout
         style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-        android:layout_width="300dp"
+        android:layout_width="350dp"
         android:layout_height="90dp"
         app:startIconDrawable="@drawable/ic_email"
         android:hint="Email"
@@ -57,23 +58,23 @@
         >
         <com.google.android.material.textfield.TextInputEditText
             android:id="@+id/emailTF"
-            android:layout_width="300dp"
+            android:layout_width="350dp"
             android:layout_height="55dp"
             />
     </com.google.android.material.textfield.TextInputLayout>
 
         <com.google.android.material.textfield.TextInputLayout
             style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
-            android:layout_width="300dp"
+            android:layout_width="350dp"
             android:layout_height="90dp"
             app:startIconDrawable="@drawable/code"
             android:hint="Assistance Code"
-            android:layout_marginTop="10dp"
-            android:enabled="false"
+            android:layout_marginTop="20dp"
+
             >
             <com.google.android.material.textfield.TextInputEditText
                 android:id="@+id/codeTF"
-                android:layout_width="300dp"
+                android:layout_width="350dp"
                 android:layout_height="55dp"
                 android:inputType="numberDecimal"
                 />
@@ -81,9 +82,9 @@
 
         <Button
             android:id="@+id/update"
-            android:layout_width="300dp"
+            android:layout_width="350dp"
             android:layout_height="55dp"
-            android:layout_marginTop="50dp"
+            android:layout_marginTop="40dp"
             android:backgroundTint="@color/colorpurple"
             android:drawableLeft="@drawable/ic_update"
             android:layout_gravity="center_horizontal"

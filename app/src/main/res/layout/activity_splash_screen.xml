@@ -42,7 +42,7 @@
             android:layout_alignParentBottom="true"
             android:gravity="center_horizontal"
             android:layout_gravity="center"
-            android:text="let the sightless perceive!"
+            android:text="let the sightless perceive"
             android:textColor="#454545"
             android:textSize="20sp" />
 

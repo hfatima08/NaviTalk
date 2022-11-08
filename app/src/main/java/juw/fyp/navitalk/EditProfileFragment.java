@@ -1,6 +1,8 @@
-package juw.fyp.navitalk;
+ package juw.fyp.navitalk;
 
 import android.app.ActionBar;
+import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -27,6 +29,7 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 
 import juw.fyp.navitalk.models.Users;
@@ -38,6 +41,7 @@ public class EditProfileFragment extends Fragment {
     Button update;
     FirebaseDatabase database;
     Users users = new Users();
+    int i=1;
 
     public EditProfileFragment() {
         // Required empty public constructor
@@ -62,8 +66,8 @@ public class EditProfileFragment extends Fragment {
         userId =  FirebaseAuth.getInstance().getCurrentUser().getUid();
         userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
         String role = users.getRole();
-        getUserData();
 
+        getUserData();
 
         //Update data
         update.setOnClickListener(new View.OnClickListener() {
@@ -93,15 +97,44 @@ public class EditProfileFragment extends Fragment {
 
                                 //--------- update Assistance code -----------
 
-//                                rootRef.child("Users").orderByChild("code").equalTo(Bcode.toString()).addListenerForSingleValueEvent(new ValueEventListener() {
+//                                rootRef.child("Users").orderByChild("code").equalTo(Bcode).addListenerForSingleValueEvent(new ValueEventListener() {
 //                                    @Override
 //                                    public void onDataChange(DataSnapshot dataSnapshot) {
 //                                        if (dataSnapshot.exists()) {
 //                                            Boolean role = dataSnapshot.getValue().toString().contains("Blind User");
 //                                            if (role.equals(true)) {
-//                                           //     users.setCode(code);
-//                                                rootRef.child("Users").child(userId).updateChildren(code);
-//                                        //      rootRef.child("Users").child(userId).child("code").setValue(code);
+//                                                final HashMap<String, Object> codes = new HashMap<>();
+//                                                codes.put("code"+i, Bcode);
+//                                                rootRef.child("Users").child(userId).child("code").addChildEventListener(new ChildEventListener() {
+//                                                    @Override
+//                                                    public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+//                                                        Toast.makeText(getContext(), "code added", Toast.LENGTH_SHORT).show();
+//                                                    }
+//
+//                                                    @Override
+//                                                    public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+//
+//                                                    }
+//
+//                                                    @Override
+//                                                    public void onChildRemoved(@NonNull DataSnapshot snapshot) {
+//
+//                                                    }
+//
+//                                                    @Override
+//                                                    public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
+//
+//                                                    }
+//
+//                                                    @Override
+//                                                    public void onCancelled(@NonNull DatabaseError error) {
+//
+//                                                    }
+//                                                });
+//                                                i++;
+//                                              //  users.setCode(Bcode);
+//                                              //  rootRef.child("Users").child(userId).updateChildren(code);
+//                                          //   rootRef.child("Users").child(userId).child("code").setValue(Bcode);
 //
 //                                            }
 //                                        }
@@ -133,16 +166,16 @@ public class EditProfileFragment extends Fragment {
 
     private void getUserData() {
         email.setText(userEmail);
-
         DatabaseReference reference = database.getReference("Users/"+userId);
         reference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Users users = dataSnapshot.getValue(Users.class);
                 userName = users.getUserName();
-                code = users.getCode();
+               // code = users.getCode();
                 name.setText(userName);
-                Acode.setText(code.toString());
+         //       Acode.setText(code.toString());
+
                 }
 
 
@@ -151,5 +184,7 @@ public class EditProfileFragment extends Fragment {
 
             }
         });
+
+
     }
 }

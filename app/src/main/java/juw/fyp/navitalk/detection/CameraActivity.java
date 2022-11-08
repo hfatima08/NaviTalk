@@ -20,6 +20,7 @@ import android.Manifest;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
@@ -69,6 +70,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
 import juw.fyp.navitalk.Adapter.UserAdapter;
@@ -100,7 +102,7 @@ public abstract class CameraActivity extends AppCompatActivity
   public TextToSpeech t1;
   DatabaseReference reference;
   Long bcode;
-  String uid,obj=null;
+  String uid,volid,obj=null,userName;
   String[] labels = {"person","bicycle","car", "motorcycle","airplane","bus","train","truck", "boat","traffic light", "fire hydrant","stop sign","parking meter", "bench",
           "bird","cat","dog","horse","sheep","cow","elephant", "bear","zebra", "giraffe","backpack","umbrella","handbag","tie","suitcase","frisbee","skis","snowboard","sports ball",
           "kite", "baseball bat","baseball glove","skateboard","surfboard","tennis racket","bottle","wine glass","cup","fork","knife","spoon","bowl" ,"banana","apple",
@@ -127,6 +129,7 @@ public abstract class CameraActivity extends AppCompatActivity
   private BottomSheetBehavior<LinearLayout> sheetBehavior;
   protected ImageView bottomSheetArrowImageView;
   private Object ArrayIndexOutOfBoundsException;
+  SharedPreferences sh;
 
   @Override
   protected void onCreate(final Bundle savedInstanceState) {
@@ -166,7 +169,7 @@ public abstract class CameraActivity extends AppCompatActivity
     vol = findViewById(R.id.vol);
 
    getCode();
-   getVolunteer();
+  getVolunteer();
 
 //BottomSheet code
     ViewTreeObserver vto = gestureLayout.getViewTreeObserver();
@@ -242,6 +245,14 @@ public abstract class CameraActivity extends AppCompatActivity
 
   }//end of onCreate()
 
+//BackButton Code
+  @Override
+  public void onBackPressed()
+  {
+   // finish();
+    moveTaskToBack(true);
+  }
+
   //Swipe Gesture Code
   private class SwipeListener implements View.OnTouchListener{
     GestureDetector gestureDetector;
@@ -292,7 +303,7 @@ public abstract class CameraActivity extends AppCompatActivity
                 }
                 else{
              //     textView.setText("swiped left");
-                  t1.speak("If you want to detect an object say detection. You are assigned an assistance code. The volunteer will need this code to help you through video call. To know your code just say code. Anytime you require visual assistance, say video call. Simply say logout to get logged out from your account.", TextToSpeech.QUEUE_ADD, null);
+                  t1.speak("If you want to detect an object say detection. You are assigned an assistance code. The volunteer will need this code to help you through video call. To know your code just say code. Anytime you require visual assistance, say video call. Simply say delete to delete your account.", TextToSpeech.QUEUE_ADD, null);
                   t1.speak("Swipe left to listen again and swipe right to say something.", TextToSpeech.QUEUE_ADD, null);
                 }
                 return true;
@@ -342,7 +353,7 @@ public abstract class CameraActivity extends AppCompatActivity
         case 10:
           String cmd = result.get(0);
           switch (cmd) {
-            case "log out":
+            case "delete":
               SignOut();
               break;
 
@@ -374,41 +385,44 @@ public abstract class CameraActivity extends AppCompatActivity
                   break;
 
             case "video call":
-              t1.speak("who do you want to call? Tell me the number for the respective volunteer when i say start speaking", TextToSpeech.QUEUE_ADD, null);
+
               //Toast.makeText(this, Alist.get(0).getUserName(), Toast.LENGTH_SHORT).show();
               if(!Alist.isEmpty()){
+                t1.speak("who do you want to call? Tell me the number for the respective volunteer when i say start speaking", TextToSpeech.QUEUE_ADD, null);
                 int i = 1;
               for (Users vol : Alist) {
                 t1.speak("say"+ i + "for" + vol.getUserName(), TextToSpeech.QUEUE_ADD, null);
                 i++;
-              }}else{
+              }
+
+                new Handler().postDelayed(new Runnable() {
+                  @Override
+                  public void run() {
+                    t1.speak("start speaking", TextToSpeech.QUEUE_ADD, null);
+                    new Handler().postDelayed(new Runnable() {
+                      @Override
+                      public void run() {
+                        intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "tell the number");
+                        if (intent.resolveActivity(getPackageManager()) != null) {
+                          startActivityForResult(intent, 20);
+                          new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                              finishActivity(20);
+                            }
+                          },5000);
+
+                        } else {
+                          t1.speak("Your device does not support speech input", TextToSpeech.QUEUE_ADD, null);
+                        }
+                      }
+                    }, 1000);
+                  }
+                }, 9000);
+              }else{
                 t1.speak("No Volunteer Registered. You have to give your assistance code to your volunteer. To know your code swipe right and say code ", TextToSpeech.QUEUE_ADD, null);
               }
 
-              new Handler().postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                  t1.speak("start speaking", TextToSpeech.QUEUE_ADD, null);
-                  new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                      intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "tell the number");
-                      if (intent.resolveActivity(getPackageManager()) != null) {
-                        startActivityForResult(intent, 20);
-                        new Handler().postDelayed(new Runnable() {
-                          @Override
-                          public void run() {
-                            finishActivity(20);
-                          }
-                        },5000);
-
-                      } else {
-                        t1.speak("Your device does not support speech input", TextToSpeech.QUEUE_ADD, null);
-                      }
-                    }
-                  }, 1000);
-                }
-              }, 9000);
               break;
 
             case "code":
@@ -422,11 +436,17 @@ public abstract class CameraActivity extends AppCompatActivity
 
         case 20:
           String cmd2 = result.get(0);
+          if(cmd2.equals("one")){
+            cmd2="1";
+          }if(cmd2.equals("two")){
+          cmd2="2";
+        }
          int num = Integer.parseInt(cmd2);
          num--;
-          Intent intent = new Intent(getApplicationContext(), ConnectingActivity.class);
           String id= (String) Alist.get(num).getUserId();
-          t1.speak("Calling"+Alist.get(num).getUserName(), TextToSpeech.QUEUE_ADD, null);
+          String name = (String) Alist.get(num).getUserName();
+          t1.speak("Calling"+name, TextToSpeech.QUEUE_ADD, null);
+          Intent intent = new Intent(getApplicationContext(), ConnectingActivity.class);
           intent.putExtra("vol",id);
           startActivity(intent);
           break;
@@ -457,18 +477,7 @@ public abstract class CameraActivity extends AppCompatActivity
     }
   }
 
-  //Logout Code
-  private void SignOut() {
-    signInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
-      @Override
-      public void onComplete(@NonNull Task<Void> task) {
-        FirebaseAuth.getInstance().signOut();
-        Intent intent = new Intent(getApplicationContext(), RoleScreen.class);
-        finishAffinity();
-        startActivity(intent);
-      }
-    });
-  }
+
 
   //Fetch Blind's Assistance Code
   private void getCode() {
@@ -490,6 +499,7 @@ public abstract class CameraActivity extends AppCompatActivity
 
   //Fetch Volunteer's Data
   private void getVolunteer() {
+
     DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
     reference.addValueEventListener(new ValueEventListener() {
       @Override
@@ -498,7 +508,8 @@ public abstract class CameraActivity extends AppCompatActivity
         for(DataSnapshot dataSnapshot: snapshot.getChildren()){
 
        Users users = dataSnapshot.getValue(Users.class);
-           if(users.getRole().equals("Volunteer") && users.getCode().equals(bcode)){
+         //  if(users.getRole().equals("Volunteer") && users.getCode().equals(bcode)){
+          if(users.getRole().equals("Volunteer")){
               vol.setText("VOLUNTEERS");
               Alist.add(users);
           }
@@ -517,6 +528,19 @@ public abstract class CameraActivity extends AppCompatActivity
       vol.setText("No Volunteers Registered!");
     }
 
+ }
+
+  //Logout Code
+  private void SignOut() {
+    signInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
+      @Override
+      public void onComplete(@NonNull Task<Void> task) {
+        FirebaseAuth.getInstance().signOut();
+        Intent intent = new Intent(getApplicationContext(), RoleScreen.class);
+        finishAffinity();
+        startActivity(intent);
+      }
+    });
   }
 
   //TensorFlow Api Detection and Camera Code
