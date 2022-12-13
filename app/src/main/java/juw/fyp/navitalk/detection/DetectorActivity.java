@@ -79,8 +79,9 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
   private Matrix cropToFrameTransform;
   private MultiBoxTracker tracker;
   private BorderedText borderedText;
-
-  boolean detected=false;
+  final List<Detector.Recognition> mappedRecognitions = new ArrayList<Detector.Recognition>();
+  public int obj_distance;
+  public static String distance;
 
 
   @Override
@@ -140,7 +141,7 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
           public void drawCallback(final Canvas canvas) {
             tracker.draw(canvas);
             if (isDebug()) {
-              tracker.drawDebug(canvas);
+          //    tracker.drawDebug(canvas);
             }
           }
         });
@@ -159,13 +160,23 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
      readyForNextImage();
       return;
     }
-    computingDetection = true;
+
 
     LOGGER.i("Preparing image " + currTimestamp + " for detection in bg thread.");
 
     rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
 
-   readyForNextImage();
+      rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
+
+
+      mappedRecognitions.clear();
+
+      new Handler().postDelayed(new Runnable() {
+          @Override
+          public void run() {
+              readyForNextImage();
+          }
+      }, 4500);
 
     final Canvas canvas = new Canvas(croppedBitmap);
     canvas.drawBitmap(rgbFrameBitmap, frameToCropTransform, null);
@@ -183,7 +194,6 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
             final List<Detector.Recognition> results = detector.recognizeImage(croppedBitmap);
           //  String results = detector.recognizeImage(croppedBitmap);
             lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
-
             cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
             final Canvas canvas = new Canvas(cropCopyBitmap);
             final Paint paint = new Paint();
@@ -198,20 +208,21 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
                 break;
             }
 
-            final List<Detector.Recognition> mappedRecognitions =
-                new ArrayList<Detector.Recognition>();
+
 
            for (final Detector.Recognition result : results) {
-           // for(int i=0; i<=results.size();i++) {
-             // Detector.Recognition result = results.get(i);
               final RectF location = result.getLocation();
               if (location != null && result.getConfidence() >= minimumConfidence && result.getTitle().equals(obj)) {
+                  float x1 = location.right;
+                  float x2 = location.left;
+                  float mid_x = location.centerX();
+               distance =  getObjDistance(x1,x2);
                 canvas.drawRect(location, paint);
                 cropToFrameTransform.mapRect(location);
                 result.setLocation(location);
-                // Toast.makeText(DetectorActivity.this, (int) location.width(), Toast.LENGTH_SHORT).show();
                 mappedRecognitions.add(result);
-                 t1.speak(obj + "detected", TextToSpeech.QUEUE_ADD, null);
+                  computingDetection = true;
+            //     t1.speak(obj + "detected", TextToSpeech.QUEUE_ADD, null);
                   break;
               }
             }
@@ -220,8 +231,8 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
             trackingOverlay.postInvalidate();
             computingDetection = false;
 
-//            if(!obj.equals(null)) {
-//                t1.speak(obj + "detected", TextToSpeech.QUEUE_FLUSH, null);
+//            if(obj.isEmpty()) {
+//                t1.speak(obj + "detected", TextToSpeech.QUEUE_ADD, null);
 //            }
 
           }
@@ -229,10 +240,25 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
 
   }
 
+    private String getObjDistance(float x1,float x2) {
+        x1 = (x1/720)*100;
+        x2 = (x2/720)*100;
+        obj_distance = (int) (x1-x2);
+       int mid_x = (int) ((x1 + x2)/2);
+        if (obj_distance >=28 && mid_x>=19) {
+            return "Stop!,It's at your hand distance";
+        }
+//        else if (obj_distance<30 && mid_x<19) {
+//            return "Stop!,It's at your hand distance";
+//
+//        }
+        else {
+            return "Move Forward,Take a small step";
+        }
+    }
 
 
-
-  @Override
+    @Override
   protected int getLayoutId() {
     return R.layout.tfe_od_camera_connection_fragment_tracking;
   }

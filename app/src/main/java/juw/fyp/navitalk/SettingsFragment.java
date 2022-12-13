@@ -75,7 +75,7 @@ public class SettingsFragment extends Fragment {
                 String appPackage="com.facebook.katana ";
 
                 openLink(appLink,appPackage,webLink);
-                
+
             }
         });
 
@@ -128,15 +128,19 @@ public class SettingsFragment extends Fragment {
         }
     }
 
+    //delete account
     private void SignOut() {
         signInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
             public void onComplete(@NonNull Task<Void> task) {
-                FirebaseAuth.getInstance().signOut();
+                uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
+                FirebaseAuth.getInstance().getCurrentUser().delete();
+                FirebaseDatabase.getInstance().getReference("Users").child(uid).removeValue();
                 Intent intent = new Intent(getActivity(),RoleScreen.class);
                 getActivity().finishAffinity();
                 startActivity(intent);
             }
         });
+
     }
 }

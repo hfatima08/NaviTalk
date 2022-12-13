@@ -91,9 +91,19 @@
             android:text="Update Profile"
             android:textColor="@color/white"
            />
-    </LinearLayout>
+
+        <Button
+            android:id="@+id/viewList"
+            android:layout_width="350dp"
+            android:layout_height="55dp"
+            android:layout_marginTop="10dp"
+            android:backgroundTint="@color/colorpurple"
+            android:drawableLeft="@drawable/ic_list"
+            android:layout_gravity="center_horizontal"
+            android:text="View Assistance Codes"
+            android:textColor="@color/white"
+            />
 
 </LinearLayout>
 
-
-
+</LinearLayout>

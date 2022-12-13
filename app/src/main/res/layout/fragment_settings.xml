@@ -165,9 +165,9 @@
                 android:layout_height="55dp"
                 android:layout_marginTop="60dp"
                 android:backgroundTint="@color/colorpurple"
-                android:drawableLeft="@drawable/ic_delete"
+                android:drawableLeft="@drawable/ic_baseline_logout_24"
                 android:layout_centerInParent="true"
-                android:text="Delete Account"
+                android:text="Logout"
                 android:textColor="@color/white"
                 android:layout_below="@id/imageshare"/>
 

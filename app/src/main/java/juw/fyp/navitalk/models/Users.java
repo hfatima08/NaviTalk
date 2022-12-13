@@ -1,11 +1,14 @@
 package juw.fyp.navitalk.models;
 
+import java.util.List;
+
 public class Users {
     private String UserId;
     private String UserName;
     private String mail;
     private String Role;
-  //  private Long code;
+    private List<String> code;
+ //   private Long code;
 
     public Users(){}
 
@@ -16,6 +19,15 @@ public class Users {
 //    public void setCode(Long code) {
 //        this.code = code;
 //    }
+
+
+    public List<String> getCode() {
+        return code;
+    }
+
+    public void setCode(List<String> code) {
+        this.code = code;
+    }
 
     public String getUserId() {
         return UserId;

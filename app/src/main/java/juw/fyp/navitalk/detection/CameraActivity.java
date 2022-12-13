@@ -62,6 +62,7 @@ import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.firebase.auth.FirebaseAuth;
@@ -83,6 +84,7 @@ import juw.fyp.navitalk.models.Users;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Locale;
 
 public abstract class CameraActivity extends AppCompatActivity
@@ -101,7 +103,7 @@ public abstract class CameraActivity extends AppCompatActivity
   SwipeListener swipeListener;
   public TextToSpeech t1;
   DatabaseReference reference;
-  Long bcode;
+  String bcode;
   String uid,volid,obj=null,userName;
   String[] labels = {"person","bicycle","car", "motorcycle","airplane","bus","train","truck", "boat","traffic light", "fire hydrant","stop sign","parking meter", "bench",
           "bird","cat","dog","horse","sheep","cow","elephant", "bear","zebra", "giraffe","backpack","umbrella","handbag","tie","suitcase","frisbee","skis","snowboard","sports ball",
@@ -303,7 +305,7 @@ public abstract class CameraActivity extends AppCompatActivity
                 }
                 else{
              //     textView.setText("swiped left");
-                  t1.speak("If you want to detect an object say detection. You are assigned an assistance code. The volunteer will need this code to help you through video call. To know your code just say code. Anytime you require visual assistance, say video call. Simply say delete to delete your account.", TextToSpeech.QUEUE_ADD, null);
+                  t1.speak("If you want to detect an object say detection. You are assigned an assistance code. The volunteer will need this code to help you through video call. To know your code just say code. Anytime you require visual assistance, say video call. Simply say logout to get logged out from your account.", TextToSpeech.QUEUE_ADD, null);
                   t1.speak("Swipe left to listen again and swipe right to say something.", TextToSpeech.QUEUE_ADD, null);
                 }
                 return true;
@@ -319,7 +321,6 @@ public abstract class CameraActivity extends AppCompatActivity
                 }
                 else{
                   //  textView.setText("swiped up");
-
                 }
                 return true;
               }
@@ -353,7 +354,7 @@ public abstract class CameraActivity extends AppCompatActivity
         case 10:
           String cmd = result.get(0);
           switch (cmd) {
-            case "delete":
+            case "logout":
               SignOut();
               break;
 
@@ -385,7 +386,6 @@ public abstract class CameraActivity extends AppCompatActivity
                   break;
 
             case "video call":
-
               //Toast.makeText(this, Alist.get(0).getUserName(), Toast.LENGTH_SHORT).show();
               if(!Alist.isEmpty()){
                 t1.speak("who do you want to call? Tell me the number for the respective volunteer when i say start speaking", TextToSpeech.QUEUE_ADD, null);
@@ -405,20 +405,13 @@ public abstract class CameraActivity extends AppCompatActivity
                         intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "tell the number");
                         if (intent.resolveActivity(getPackageManager()) != null) {
                           startActivityForResult(intent, 20);
-                          new Handler().postDelayed(new Runnable() {
-                            @Override
-                            public void run() {
-                              finishActivity(20);
-                            }
-                          },5000);
-
                         } else {
                           t1.speak("Your device does not support speech input", TextToSpeech.QUEUE_ADD, null);
                         }
                       }
-                    }, 1000);
+                    }, 3000);
                   }
-                }, 9000);
+                }, 7000);
               }else{
                 t1.speak("No Volunteer Registered. You have to give your assistance code to your volunteer. To know your code swipe right and say code ", TextToSpeech.QUEUE_ADD, null);
               }
@@ -426,7 +419,10 @@ public abstract class CameraActivity extends AppCompatActivity
               break;
 
             case "code":
-              t1.speak("Your Assistance code is :"+bcode.toString(), TextToSpeech.QUEUE_ADD, null);
+              t1.speak("Your Assistance code is :", TextToSpeech.QUEUE_ADD, null);
+              for(int i=0;i<=bcode.length()-1;i++) {
+                t1.speak(String.valueOf(bcode.charAt(i)), TextToSpeech.QUEUE_ADD, null);
+              }
               break;
 
             default:
@@ -438,7 +434,7 @@ public abstract class CameraActivity extends AppCompatActivity
           String cmd2 = result.get(0);
           if(cmd2.equals("one")){
             cmd2="1";
-          }if(cmd2.equals("two")){
+          }if(cmd2.equals("two") || cmd2.equals("to")){
           cmd2="2";
         }
          int num = Integer.parseInt(cmd2);
@@ -482,12 +478,11 @@ public abstract class CameraActivity extends AppCompatActivity
   //Fetch Blind's Assistance Code
   private void getCode() {
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
-    DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users/"+user.getUid()+"/code");
+    DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users/"+user.getUid()+"/code"+"/0");
     reference.addListenerForSingleValueEvent(new ValueEventListener() {
       @Override
       public void onDataChange(DataSnapshot dataSnapshot) {
-        Long users = dataSnapshot.getValue(Long.class);
-        bcode = Long.parseLong(users.toString());
+         bcode = dataSnapshot.getValue(String.class);
         code.setText("ASSISTANCE CODE: "+ bcode);
       }
       @Override
@@ -509,7 +504,7 @@ public abstract class CameraActivity extends AppCompatActivity
 
        Users users = dataSnapshot.getValue(Users.class);
          //  if(users.getRole().equals("Volunteer") && users.getCode().equals(bcode)){
-          if(users.getRole().equals("Volunteer")){
+          if(users.getRole().equals("Volunteer") && users.getCode().contains(bcode)){
               vol.setText("VOLUNTEERS");
               Alist.add(users);
           }
@@ -532,6 +527,17 @@ public abstract class CameraActivity extends AppCompatActivity
 
   //Logout Code
   private void SignOut() {
+//    FirebaseDatabase.getInstance().getReference("Users").child(uid).removeValue();
+//        FirebaseAuth.getInstance().getCurrentUser().delete().addOnCompleteListener(new OnCompleteListener<Void>() {
+//          @Override
+//          public void onComplete(@NonNull Task<Void> task) {
+//            if(task.isSuccessful()){
+//            Intent intent = new Intent(getApplicationContext(), RoleScreen.class);
+//            finishAffinity();
+//            startActivity(intent);}
+//          }
+//        });
+
     signInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
       @Override
       public void onComplete(@NonNull Task<Void> task) {

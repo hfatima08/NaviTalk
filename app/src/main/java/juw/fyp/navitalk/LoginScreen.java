@@ -76,6 +76,7 @@ public class LoginScreen extends AppCompatActivity {
     SwipeListener swipeListener;
     TextToSpeech t1;
     Intent intent;
+    ArrayList<String> codeList;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -88,6 +89,8 @@ public class LoginScreen extends AppCompatActivity {
         linearLayout = findViewById(R.id.linearlayout);
         name = findViewById(R.id.usernameTF);
 
+        //code list
+        codeList = new ArrayList<String>();
 
         //Login onclick method call
         login.setOnClickListener(new View.OnClickListener() {
@@ -283,8 +286,10 @@ public class LoginScreen extends AppCompatActivity {
                  users.setRole("Volunteer");
              }else{
                 users.setRole("Blind User");
-                Long code = getRandom();
-            //    users.setCode(code);
+                String code = getRandom();
+                codeList.add(code);
+                users.setCode(codeList);
+
             }
     }
 
@@ -305,14 +310,14 @@ public class LoginScreen extends AppCompatActivity {
     //Google Signin End
 
     //random number for blind assistance code
-    public Long getRandom() {
+    public String getRandom() {
         // It will generate 6 digit random Number.
         // from 0 to 999999
         Random rnd = new Random();
         int number = rnd.nextInt(999999 );
 
         // this will convert any number sequence into 6 character.
-        return Long.parseLong(String.format("%06d", number));
+        return String.format("%06d", number);
     }
 
 //Signout if user is already logged-in as a different role
@@ -366,33 +371,38 @@ public class LoginScreen extends AppCompatActivity {
         submit.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Long num = Long.parseLong(code.getText().toString());
-                DatabaseReference ref=FirebaseDatabase.getInstance().getReference().child("Users");
-                ref.orderByChild("code").equalTo(num).addListenerForSingleValueEvent(new ValueEventListener() {
-                    @Override
-                    public void onDataChange(DataSnapshot dataSnapshot) {
-                        if (dataSnapshot.exists()) {
-                                Boolean role = dataSnapshot.getValue().toString().contains("Blind User");
-                                 if (role.equals(true)) {
-                                       //     users.setCode(num);
-                                     Toast.makeText(LoginScreen.this, users.getUserName(), Toast.LENGTH_SHORT).show();
-                                     database.getReference().child("Users").child(user.getUid()).setValue(users);
-                                           OpenActivity();
-                                        }
+                String num =code.getText().toString();
+                if(num.length()==6) {
+                    DatabaseReference ref = FirebaseDatabase.getInstance().getReference().child("Users");
+                    ref.orderByChild("role").equalTo("Blind User").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(DataSnapshot dataSnapshot) {
+                            if (dataSnapshot.exists()) {
+                                Boolean code = dataSnapshot.getValue().toString().contains(num);
+                                if (code.equals(true)) {
+                                    codeList.add(num);
+                                    users.setCode(codeList);
+                                    //   Toast.makeText(LoginScreen.this, users.getUserName(), Toast.LENGTH_SHORT).show();
+                                    database.getReference().child("Users").child(user.getUid()).setValue(users);
+                                    OpenActivity();
                                 }
-                        else {
-                            Toast.makeText(getApplicationContext(), "ERROR: Invalid Code! ", Toast.LENGTH_SHORT).show();
+                            } else {
+                                Toast.makeText(getApplicationContext(), "ERROR: Invalid Code! ", Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    }
-                    @Override
-                    public void onCancelled(@NonNull DatabaseError error) {
 
-                    }
-                });
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError error) {
+
+                        }
+                    });
+                }   else{
+                    Toast.makeText(getApplicationContext(), "ERROR: Code Should Consists of 6 Digits! ", Toast.LENGTH_SHORT).show();
+                }
             }
         });
 
-   }
+    }
 
     //Image Animation
     private void startAnimation() {
