@@ -52,7 +52,7 @@ public class codeAdapter extends RecyclerView.Adapter<codeAdapter.ViewHolder> {
     @Override
     public void onBindViewHolder(@NonNull ViewHolder holder, int position) {
         String Acode = arrayList.get(position);
-        holder.code.setText(Acode);
+       holder.code.setText(Acode);
 
 
         ref.orderByChild("role").equalTo("Blind User").addValueEventListener(new ValueEventListener() {
