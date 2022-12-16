@@ -39,8 +39,8 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
         PublisherKit.PublisherListener {
 
     private static String API_KEY = "47555231";
-    private static String SESSION_ID = "1_MX40NzU1NTIzMX5-MTY2NzU2ODkyNjg1MX5EcFc4WnpYOCtMVmpFc0FmL3Q3bTQzZnN-fg";
-    private static String TOKEN ="T1==cGFydG5lcl9pZD00NzU1NTIzMSZzaWc9ZGExNDA2ZjgwYjhmODdiZjA1YzgzNjkzOWIwODc3NDQ3YzVmYWE5NjpzZXNzaW9uX2lkPTFfTVg0ME56VTFOVEl6TVg1LU1UWTJOelUyT0RreU5qZzFNWDVFY0ZjNFducFlPQ3RNVm1wRmMwRm1MM1EzYlRRelpuTi1mZyZjcmVhdGVfdGltZT0xNjY3NTY4OTYwJm5vbmNlPTAuNzE1MTk5MDE5NTQ2MTQ1MSZyb2xlPXB1Ymxpc2hlciZleHBpcmVfdGltZT0xNjcwMTYwOTU4JmluaXRpYWxfbGF5b3V0X2NsYXNzX2xpc3Q9";
+    private static String SESSION_ID = "2_MX40NzU1NTIzMX5-MTY3MTIwOTc1MzYwM35zSkgzSzBBQnB4eDltRkxEby8rODFMQ1F-fn4";
+    private static String TOKEN ="T1==cGFydG5lcl9pZD00NzU1NTIzMSZzaWc9YjczNmIxZWIxYjczOTUzMGFmOTZhMzc4YWJlOThmMDYwNDFlNWUxZDpzZXNzaW9uX2lkPTJfTVg0ME56VTFOVEl6TVg1LU1UWTNNVEl3T1RjMU16WXdNMzV6U2tnelN6QkJRbkI0ZURsdFJreEVieThyT0RGTVExRi1mbjQmY3JlYXRlX3RpbWU9MTY3MTIwOTc3NCZub25jZT0wLjgzNDQyNzUxMDk5MzE3NDcmcm9sZT1wdWJsaXNoZXImZXhwaXJlX3RpbWU9MTY3MzgwMTc3NCZpbml0aWFsX2xheW91dF9jbGFzc19saXN0PQ==";
     private static final String LOG_TAG = CallActivity2.class.getSimpleName();
     private static final int RC_VIDEO_APP_PERM = 124;
 
