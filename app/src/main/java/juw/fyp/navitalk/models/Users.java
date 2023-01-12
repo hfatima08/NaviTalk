@@ -8,18 +8,8 @@ public class Users {
     private String mail;
     private String Role;
     private List<String> code;
- //   private Long code;
 
     public Users(){}
-
-//    public Long getCode() {
-//        return code;
-//    }
-//
-//    public void setCode(Long code) {
-//        this.code = code;
-//    }
-
 
     public List<String> getCode() {
         return code;

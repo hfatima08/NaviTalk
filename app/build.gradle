@@ -20,7 +20,7 @@ android {
 
     buildTypes {
         release {
-            minifyEnabled false
+            minifyEnabled true
             proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
         }
     }
@@ -37,6 +37,7 @@ project.ext.TMP_DIR   = project.buildDir.toString() + '/downloads'
 // Download default models; if you wish to use your own models then
 // place them in the "assets" directory and comment out this line.
 apply from:'download_model.gradle'
+
 
 dependencies {
 
@@ -67,5 +68,8 @@ dependencies {
     //videocall
     implementation 'com.opentok.android:opentok-android-sdk:2.22.3'
     implementation 'pub.devrel:easypermissions:3.0.0'
+
+    //sweetalert dialog
+    implementation 'com.github.cazaea:sweet-alert-dialog:1.0.0'
 
 }

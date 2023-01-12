@@ -1,26 +1,9 @@
-/*
- * Copyright 2019 The TensorFlow Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package juw.fyp.navitalk.detection;
 
 import android.Manifest;
 import android.app.Fragment;
 import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.hardware.Camera;
 import android.hardware.camera2.CameraAccessException;
@@ -51,18 +34,15 @@ import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
-
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
 import com.google.firebase.auth.FirebaseAuth;
@@ -71,9 +51,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
 import juw.fyp.navitalk.Adapter.UserAdapter;
 import juw.fyp.navitalk.ConnectingActivity;
 import juw.fyp.navitalk.R;
@@ -81,15 +59,11 @@ import juw.fyp.navitalk.RoleScreen;
 import juw.fyp.navitalk.detection.env.ImageUtils;
 import juw.fyp.navitalk.detection.env.Logger;
 import juw.fyp.navitalk.models.Users;
-
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.Locale;
 
-public abstract class CameraActivity extends AppCompatActivity
-    implements OnImageAvailableListener,
-        Camera.PreviewCallback{
+public abstract class CameraActivity extends AppCompatActivity implements OnImageAvailableListener,Camera.PreviewCallback {
   private static final Logger LOGGER = new Logger();
   GoogleSignInClient signInClient;
   GoogleSignInOptions signInOptions;
@@ -104,7 +78,7 @@ public abstract class CameraActivity extends AppCompatActivity
   public TextToSpeech t1;
   DatabaseReference reference;
   String bcode;
-  String uid,volid,obj=null,userName;
+  String uid,obj=null;
   String[] labels = {"person","bicycle","car", "motorcycle","airplane","bus","train","truck", "boat","traffic light", "fire hydrant","stop sign","parking meter", "bench",
           "bird","cat","dog","horse","sheep","cow","elephant", "bear","zebra", "giraffe","backpack","umbrella","handbag","tie","suitcase","frisbee","skis","snowboard","sports ball",
           "kite", "baseball bat","baseball glove","skateboard","surfboard","tennis racket","bottle","wine glass","cup","fork","knife","spoon","bowl" ,"banana","apple",
@@ -130,8 +104,7 @@ public abstract class CameraActivity extends AppCompatActivity
   private LinearLayout gestureLayout;
   private BottomSheetBehavior<LinearLayout> sheetBehavior;
   protected ImageView bottomSheetArrowImageView;
-  private Object ArrayIndexOutOfBoundsException;
-  SharedPreferences sh;
+  public boolean detected=false;
 
   @Override
   protected void onCreate(final Bundle savedInstanceState) {
@@ -141,20 +114,7 @@ public abstract class CameraActivity extends AppCompatActivity
 
     setContentView(R.layout.tfe_od_activity_camera);
 
-    auth = FirebaseAuth.getInstance();
-    uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
-
-    signInOptions= new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
-    signInClient = GoogleSignIn.getClient(this,signInOptions);
-
-    reference = FirebaseDatabase.getInstance().getReference().child("Users");
-
-    if (hasPermission()) {
-      setFragment();
-    } else {
-      requestPermission();
-    }
-
+    // Resource ID
     relativeLayout = findViewById(R.id.layout);
     bottomSheetLayout = findViewById(R.id.bottom_sheet_layout);
     gestureLayout = findViewById(R.id.gesture_layout);
@@ -163,188 +123,205 @@ public abstract class CameraActivity extends AppCompatActivity
     code = findViewById(R.id.code);
     rv = findViewById(R.id.list);
     logout = findViewById(R.id.btn_logout);
+    vol = findViewById(R.id.vol);
+
+    // ArrayList Code
     Alist = new ArrayList<>();
     LinearLayoutManager layoutManager = new LinearLayoutManager(this);
     rv.setLayoutManager(layoutManager);
     userAdapter = new UserAdapter(Alist,this);
     rv.setAdapter(userAdapter);
-    vol = findViewById(R.id.vol);
 
-   getCode();
-  getVolunteer();
+    // Firebase Instance
+    auth = FirebaseAuth.getInstance();
+    uid = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-//BottomSheet code
-    ViewTreeObserver vto = gestureLayout.getViewTreeObserver();
-    vto.addOnGlobalLayoutListener(
-        new ViewTreeObserver.OnGlobalLayoutListener() {
-          @Override
-          public void onGlobalLayout() {
-            if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
-              gestureLayout.getViewTreeObserver().removeGlobalOnLayoutListener(this);
-            } else {
-              gestureLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
-            }
-            int height = gestureLayout.getMeasuredHeight();
+    reference = FirebaseDatabase.getInstance().getReference().child("Users");
 
-            sheetBehavior.setPeekHeight(height);
-          }
-        });
-    sheetBehavior.setHideable(false);
+    // Google Signin
+    signInOptions= new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(getString(R.string.default_web_client_id))
+            .requestEmail()
+            .build();
+    signInClient = GoogleSignIn.getClient(this,signInOptions);
 
-    sheetBehavior.setBottomSheetCallback(
-        new BottomSheetBehavior.BottomSheetCallback() {
-          @Override
-          public void onStateChanged(@NonNull View bottomSheet, int newState) {
-            switch (newState) {
-              case BottomSheetBehavior.STATE_HIDDEN:
-                break;
-              case BottomSheetBehavior.STATE_EXPANDED:
-                {
-                  bottomSheetArrowImageView.setImageResource(R.drawable.arrow_down);
+    // Check if camera permission is granted
+    if (hasPermission()) {
+      setFragment();
+    } else {
+      requestPermission();
+    }
+
+    // Call functions to get blind user Assistance code and volunteer's list
+    getCode();
+    getVolunteer();
+
+    //BottomSheet code
+        ViewTreeObserver vto = gestureLayout.getViewTreeObserver();
+        vto.addOnGlobalLayoutListener(
+            new ViewTreeObserver.OnGlobalLayoutListener() {
+              @Override
+              public void onGlobalLayout() {
+                if (Build.VERSION.SDK_INT < Build.VERSION_CODES.JELLY_BEAN) {
+                  gestureLayout.getViewTreeObserver().removeGlobalOnLayoutListener(this);
+                } else {
+                  gestureLayout.getViewTreeObserver().removeOnGlobalLayoutListener(this);
                 }
-                break;
-              case BottomSheetBehavior.STATE_COLLAPSED:
-                {
-                  bottomSheetArrowImageView.setImageResource(R.drawable.arrow_up);
+                int height = gestureLayout.getMeasuredHeight();
+
+                sheetBehavior.setPeekHeight(height);
+              }
+            });
+        sheetBehavior.setHideable(false);
+
+        sheetBehavior.setBottomSheetCallback(
+            new BottomSheetBehavior.BottomSheetCallback() {
+              @Override
+              public void onStateChanged(@NonNull View bottomSheet, int newState) {
+                switch (newState) {
+                  case BottomSheetBehavior.STATE_HIDDEN:
+                    break;
+                  case BottomSheetBehavior.STATE_EXPANDED:
+                    {
+                      bottomSheetArrowImageView.setImageResource(R.drawable.arrow_down);
+                    }
+                    break;
+                  case BottomSheetBehavior.STATE_COLLAPSED:
+                    {
+                      bottomSheetArrowImageView.setImageResource(R.drawable.arrow_up);
+                    }
+                    break;
+                  case BottomSheetBehavior.STATE_DRAGGING:
+                    break;
+                  case BottomSheetBehavior.STATE_SETTLING:
+                    bottomSheetArrowImageView.setImageResource(R.drawable.arrow_up);
+                    break;
                 }
-                break;
-              case BottomSheetBehavior.STATE_DRAGGING:
-                break;
-              case BottomSheetBehavior.STATE_SETTLING:
-                bottomSheetArrowImageView.setImageResource(R.drawable.arrow_up);
-                break;
-            }
+              }
+
+              @Override
+              public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
+            });
+
+
+      // Text To Speech Code
+      swipeListener = new SwipeListener(relativeLayout);
+
+      t1=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+        @Override
+        public void onInit(int status) {
+          if (status != TextToSpeech.ERROR) {
+            t1.setLanguage(Locale.US);
+            t1.speak("You are on the Main Screen, swipe left to listen the features and swipe right to say something.",TextToSpeech.QUEUE_ADD, null);
           }
-
-          @Override
-          public void onSlide(@NonNull View bottomSheet, float slideOffset) {}
-        });
-
-
-    //textToSpeech Code
-    swipeListener = new SwipeListener(relativeLayout);
-
-    t1=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
-      @Override
-      public void onInit(int status) {
-        if (status != TextToSpeech.ERROR) {
-          t1.setLanguage(Locale.US);
-          t1.speak("You are on the Main Screen, swipe left to listen the features and swipe right to say something.",TextToSpeech.QUEUE_ADD, null);
         }
-      }
-    });
+      });
 
    intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
    intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
-   //Logout Button Code
-    logout.setOnClickListener(new View.OnClickListener() {
-      @Override
-      public void onClick(View v) {
-        SignOut();
-      }
-    });
+     //Logout Button Code
+      logout.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View v) {
+          SignOut();
+        }
+      });
 
   }//end of onCreate()
 
-//BackButton Code
-  @Override
-  public void onBackPressed()
-  {
-   // finish();
-    moveTaskToBack(true);
-  }
+    //BackButton Code
+      @Override
+      public void onBackPressed()
+      {
+        moveTaskToBack(true);
+      }
 
-  //Swipe Gesture Code
-  private class SwipeListener implements View.OnTouchListener{
-    GestureDetector gestureDetector;
+        //Swipe Gesture Code
+        private class SwipeListener implements View.OnTouchListener{
+          GestureDetector gestureDetector;
 
-    SwipeListener(View view){
-      int threshold= 100;
-      int velocity_threshold=100;
+          SwipeListener(View view){
+            int threshold= 100;
+            int velocity_threshold=100;
 
-      GestureDetector.SimpleOnGestureListener listener = new GestureDetector.SimpleOnGestureListener(){
-        @Override
-        public boolean onDown(MotionEvent e) {
-          return true;
-        }
+            GestureDetector.SimpleOnGestureListener listener = new GestureDetector.SimpleOnGestureListener(){
+              @Override
+              public boolean onDown(MotionEvent e) {
+                return true;
+              }
 
-        @Override
-        public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
-          float xDiff = e2.getX() - e1.getX();
-          float yDiff = e2.getY() - e1.getY();
-          try {
-            if(Math.abs(xDiff) > Math.abs(yDiff)){
-              if(Math.abs(xDiff) > threshold && Math.abs(velocityX) > velocity_threshold){
-                if(xDiff>0){
-                  //textView.setText("swiped right");
-                  t1.speak(" ",TextToSpeech.QUEUE_FLUSH,null);
+              @Override
+              public boolean onFling(MotionEvent e1, MotionEvent e2, float velocityX, float velocityY) {
+                float xDiff = e2.getX() - e1.getX();
+                float yDiff = e2.getY() - e1.getY();
+                try {
+                  if(Math.abs(xDiff) > Math.abs(yDiff)){
+                    if(Math.abs(xDiff) > threshold && Math.abs(velocityX) > velocity_threshold){
+                      if(xDiff>0){
+                        // Swipe Right
+                        t1.speak(" ",TextToSpeech.QUEUE_FLUSH,null);
 
-                  t1.speak("Start speaking",TextToSpeech.QUEUE_ADD, null);
-                  new Handler().postDelayed(new Runnable() {
-                    @Override
-                    public void run() {
-                      intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Start Speaking");
-                      if(intent.resolveActivity(getPackageManager())!=null){
-                        startActivityForResult(intent,10);
+                        t1.speak("Start speaking",TextToSpeech.QUEUE_ADD, null);
                         new Handler().postDelayed(new Runnable() {
                           @Override
                           public void run() {
-                            finishActivity(10);
+                            intent.putExtra(RecognizerIntent.EXTRA_PROMPT, "Start Speaking");
+                            if(intent.resolveActivity(getPackageManager())!=null){
+                              startActivityForResult(intent,10);
+                              new Handler().postDelayed(new Runnable() {
+                                @Override
+                                public void run() {
+                                  finishActivity(10);
+                                }
+                              },5000);
+                            }else{
+                              t1.speak("Your device does not support speech input", TextToSpeech.QUEUE_ADD, null);
+                            }
                           }
-                        },5000);
-                      }else{
-
-                        t1.speak("Your device does not support speech input", TextToSpeech.QUEUE_ADD, null);
+                        }, 1000);
                       }
 
-
+                      else{
+                        // Swipe Left
+                        t1.speak("If you want to detect an object say detection. You are assigned an assistance code. The volunteer will need this code to help you through video call. To know your code just say code. Anytime you require visual assistance, say video call. Simply say logout to get logged out from your account.", TextToSpeech.QUEUE_ADD, null);
+                        t1.speak("Swipe left to listen again and swipe right to say something.", TextToSpeech.QUEUE_ADD, null);
+                      }
+                      return true;
                     }
-                  }, 1000);
+                  }
 
+                  else{
+                    if(Math.abs(yDiff) > threshold && Math.abs(velocityY) > velocity_threshold){
+                      if(yDiff>0){
+                        // Swipe Down
+                        obj=" ";
+                        t1.speak("detection stopped",TextToSpeech.QUEUE_FLUSH,null);
+                        detected=false;
+                      }
+                      else{
+                        //  Swipe Up
+                      }
+                      return true;
+                    }
+                  }
+                }catch (Exception e){
+                  e.printStackTrace();
                 }
-                else{
-             //     textView.setText("swiped left");
-                  t1.speak("If you want to detect an object say detection. You are assigned an assistance code. The volunteer will need this code to help you through video call. To know your code just say code. Anytime you require visual assistance, say video call. Simply say logout to get logged out from your account.", TextToSpeech.QUEUE_ADD, null);
-                  t1.speak("Swipe left to listen again and swipe right to say something.", TextToSpeech.QUEUE_ADD, null);
-                }
-                return true;
+                return false;
               }
-            }
-
-            else{
-              if(Math.abs(yDiff) > threshold && Math.abs(velocityY) > velocity_threshold){
-                if(yDiff>0){
-                  // textView.setText("swiped down");
-                  obj=" ";
-                  t1.stop();
-                }
-                else{
-                  //  textView.setText("swiped up");
-                }
-                return true;
-              }
-            }
-          }catch (Exception e){
-            e.printStackTrace();
+            };
+            gestureDetector = new GestureDetector(listener);
+            view.setOnTouchListener(this);
           }
-          return false;
-        }
-      };
+          @Override
+          public boolean onTouch(View v, MotionEvent event) {
+            return gestureDetector.onTouchEvent(event);
+          }
 
-      gestureDetector = new GestureDetector(listener);
+        } // end of swipe gesture code
 
-      view.setOnTouchListener(this);
-    }
-
-    @Override
-    public boolean onTouch(View v, MotionEvent event) {
-      return gestureDetector.onTouchEvent(event);
-    }
-
-  }
-
-  //Responses of Voice Commands
+  // Responses of Voice Commands
   @Override
   protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
     super.onActivityResult(requestCode, resultCode, data);
@@ -386,12 +363,11 @@ public abstract class CameraActivity extends AppCompatActivity
                   break;
 
             case "video call":
-              //Toast.makeText(this, Alist.get(0).getUserName(), Toast.LENGTH_SHORT).show();
               if(!Alist.isEmpty()){
                 t1.speak("who do you want to call? Tell me the number for the respective volunteer when i say start speaking", TextToSpeech.QUEUE_ADD, null);
                 int i = 1;
               for (Users vol : Alist) {
-                t1.speak("say"+ i + "for" + vol.getUserName(), TextToSpeech.QUEUE_ADD, null);
+                t1.speak("say zero"+ i + "for" + vol.getUserName(), TextToSpeech.QUEUE_ADD, null);
                 i++;
               }
 
@@ -461,7 +437,6 @@ public abstract class CameraActivity extends AppCompatActivity
           }
           break;
 
-
       default:
         t1.speak("Sorry! I didn't understand what you said. Swipe left to listen the features.", TextToSpeech.QUEUE_ADD, null);
 
@@ -471,11 +446,10 @@ public abstract class CameraActivity extends AppCompatActivity
     else{
       t1.speak("Sorry, I didn't hear anything", TextToSpeech.QUEUE_ADD, null);
     }
-  }
 
+  } // end of voice command response code
 
-
-  //Fetch Blind's Assistance Code
+  // Fetch Blind's Assistance Code
   private void getCode() {
     FirebaseUser user = FirebaseAuth.getInstance().getCurrentUser();
     DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users/"+user.getUid()+"/code"+"/0");
@@ -492,18 +466,15 @@ public abstract class CameraActivity extends AppCompatActivity
     });
   }
 
-  //Fetch Volunteer's Data
+  // Fetch Volunteer's Data
   private void getVolunteer() {
-
     DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users");
     reference.addValueEventListener(new ValueEventListener() {
       @Override
       public void onDataChange(@NonNull DataSnapshot snapshot) {
         Alist.clear();
         for(DataSnapshot dataSnapshot: snapshot.getChildren()){
-
        Users users = dataSnapshot.getValue(Users.class);
-         //  if(users.getRole().equals("Volunteer") && users.getCode().equals(bcode)){
           if(users.getRole().equals("Volunteer") && users.getCode().contains(bcode)){
               vol.setText("VOLUNTEERS");
               Alist.add(users);
@@ -511,22 +482,30 @@ public abstract class CameraActivity extends AppCompatActivity
          }
         userAdapter.notifyDataSetChanged();
       }
-
-
       @Override
       public void onCancelled(@NonNull DatabaseError error) {
 
       }
     });
-
     if(Alist.isEmpty()){
       vol.setText("No Volunteers Registered!");
     }
-
  }
 
   //Logout Code
   private void SignOut() {
+    //Only Signout code
+    signInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
+      @Override
+      public void onComplete(@NonNull Task<Void> task) {
+        FirebaseAuth.getInstance().signOut();
+        Intent intent = new Intent(getApplicationContext(), RoleScreen.class);
+        finishAffinity();
+        startActivity(intent);
+      }
+    });
+
+    // Delete User Code
 //    FirebaseDatabase.getInstance().getReference("Users").child(uid).removeValue();
 //        FirebaseAuth.getInstance().getCurrentUser().delete().addOnCompleteListener(new OnCompleteListener<Void>() {
 //          @Override
@@ -538,18 +517,9 @@ public abstract class CameraActivity extends AppCompatActivity
 //          }
 //        });
 
-    signInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
-      @Override
-      public void onComplete(@NonNull Task<Void> task) {
-        FirebaseAuth.getInstance().signOut();
-        Intent intent = new Intent(getApplicationContext(), RoleScreen.class);
-        finishAffinity();
-        startActivity(intent);
-      }
-    });
   }
 
-  //TensorFlow Api Detection and Camera Code
+  // TensorFlow Api Detection and Camera Code
   protected int[] getRgbBytes() {
     imageConverter.run();
     return rgbBytes;
@@ -598,7 +568,7 @@ public abstract class CameraActivity extends AppCompatActivity
           }
         };
 
-
+ // Passing the object to be detected
     processImage(obj);
   }
 
@@ -832,7 +802,6 @@ public abstract class CameraActivity extends AppCompatActivity
       fragment =
           new LegacyCameraConnectionFragment(this, getLayoutId(), getDesiredPreviewFrameSize());
     }
-
     getFragmentManager().beginTransaction().replace(R.id.container, fragment).commit();
   }
 

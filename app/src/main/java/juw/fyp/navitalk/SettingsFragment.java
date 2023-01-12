@@ -1,16 +1,13 @@
 package juw.fyp.navitalk;
 
 import android.content.ActivityNotFoundException;
-import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.Uri;
 import android.os.Bundle;
-
 import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-
 import android.text.SpannableString;
 import android.text.style.UnderlineSpan;
 import android.view.LayoutInflater;
@@ -18,30 +15,26 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
-import android.widget.Toast;
-
 import com.google.android.gms.auth.api.signin.GoogleSignIn;
 import com.google.android.gms.auth.api.signin.GoogleSignInClient;
 import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.tasks.OnCompleteListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
-import com.google.firebase.database.DataSnapshot;
-import com.google.firebase.database.DatabaseError;
-import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
-import com.google.firebase.database.ValueEventListener;
+
 
 public class SettingsFragment extends Fragment {
-    private EditProfileFragment editProfile = new EditProfileFragment();
+
     Button logout;
     GoogleSignInClient signInClient;
     GoogleSignInOptions signInOptions;
     FirebaseAuth auth;
-    String uid,userName;
+    String uid;
     TextView profile,fb,insta;
-    SharedPreferences sh;
+
+    // Fragment object
+    private EditProfileFragment editProfile = new EditProfileFragment();
 
     public SettingsFragment() {
         // Required empty public constructor
@@ -59,14 +52,19 @@ public class SettingsFragment extends Fragment {
         fb = view.findViewById(R.id.fb);
         insta = view.findViewById(R.id.insta);
 
+        // Firebase instance
         auth = FirebaseAuth.getInstance();
+
+        //Google signin
         signInOptions= new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
         signInClient = GoogleSignIn.getClient(getContext(),signInOptions);
 
+        // Underline Edit Profile text
         SpannableString content = new SpannableString(profile.getText());
         content.setSpan(new UnderlineSpan(), 0, profile.getText().length(), 0);
         profile.setText(content);
 
+        // Open Facebook Page on logo click
         fb.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -79,6 +77,7 @@ public class SettingsFragment extends Fragment {
             }
         });
 
+        // Open Instagram Page on logo click
         insta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -90,6 +89,7 @@ public class SettingsFragment extends Fragment {
             }
         });
 
+        // Logout button
         logout.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -97,6 +97,7 @@ public class SettingsFragment extends Fragment {
             }
         });
 
+        // Open Edit profile fragment on click
         profile.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -109,8 +110,9 @@ public class SettingsFragment extends Fragment {
         });
 
         return view;
-    }
+    } // end of onCreate
 
+    // Open social pages link function
     private void openLink(String appLink, String appPackage, String webLink) {
         try{
             Uri uri = Uri.parse(appLink);
@@ -128,7 +130,7 @@ public class SettingsFragment extends Fragment {
         }
     }
 
-    //delete account
+    // Logout / Signout Function
     private void SignOut() {
         signInClient.signOut().addOnCompleteListener(new OnCompleteListener<Void>() {
             @Override
@@ -141,6 +143,6 @@ public class SettingsFragment extends Fragment {
                 startActivity(intent);
             }
         });
-
     }
+
 }

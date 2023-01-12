@@ -35,12 +35,13 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
+import com.cazaea.sweetalert.SweetAlertDialog;
 import org.checkerframework.checker.units.qual.C;
 
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+
 
 import juw.fyp.navitalk.Adapter.UserAdapter;
 import juw.fyp.navitalk.Adapter.codeAdapter;
@@ -49,16 +50,12 @@ import juw.fyp.navitalk.models.Users;
 public class EditProfileFragment extends Fragment {
     private CodeListFragment codeListFragment = new CodeListFragment();
     String userId,userEmail,userName=null;
-    List<String> code;
     String Bcode;
-    ListView lv;
     TextInputEditText email,name,Acode;
     Button update,viewList;
     FirebaseDatabase database;
-    Users users = new Users();
-    int i=1;
     ArrayList<String> codeList;
-
+    SweetAlertDialog errorDialog,successDialog;
 
     public EditProfileFragment() {
         // Required empty public constructor
@@ -71,27 +68,26 @@ public class EditProfileFragment extends Fragment {
         // Inflate the layout for this fragment
         View view =  inflater.inflate(R.layout.fragment_edit_profile, container, false);
 
+        // Firebase Instance
         database = FirebaseDatabase.getInstance();
 
-        //layout Id's
+        // Layout Id's
         email = view.findViewById(R.id.emailTF);
         name = view.findViewById(R.id.usernameTF);
         Acode = view.findViewById(R.id.codeTF);
         update = view.findViewById(R.id.update);
         viewList = view.findViewById(R.id.viewList);
-        // lv = view.findViewById(R.id.clist);
 
+        // Code List Initialization
         codeList = new ArrayList<String>();
 
-        //get user details and fill text fields
+        // Get user details and fill text fields
         userId =  FirebaseAuth.getInstance().getCurrentUser().getUid();
         userEmail = FirebaseAuth.getInstance().getCurrentUser().getEmail();
-        String role = users.getRole();
 
         getUserData();
 
-
-
+        // Open Code List Activity on button click
         viewList.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -102,7 +98,7 @@ public class EditProfileFragment extends Fragment {
             }
         });
 
-        //Update data
+        // Update data
         update.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -115,80 +111,75 @@ public class EditProfileFragment extends Fragment {
                     public void onDataChange(DataSnapshot dataSnapshot) {
                         if (dataSnapshot.hasChild("Users/" + userId)) {
                             if (!newName.isEmpty()) {
-                                if(Bcode.length() ==6 ){
+                                final HashMap<String, Object> userName = new HashMap<>();
+                                userName.put("userName", newName);
+                                if(Bcode.length() == 6){
                                     if (!codeList.contains(Bcode)) {
                                         uploadCodeList();
-                                        final HashMap<String, Object> userName = new HashMap<>();
-                                        userName.put("userName", newName);
                                         rootRef.child("Users").child(userId).updateChildren(userName);
+                                    } else{
+                                        errorDialog =  new SweetAlertDialog(getContext(), SweetAlertDialog.ERROR_TYPE);
+                                        errorDialog.setTitleText("Error!");
+                                        errorDialog.setContentText("Code already exists!");
+                                        errorDialog.setConfirmText("OK" );
+                                        errorDialog.showConfirmButton(true);
+                                        errorDialog.show();
 
-                                        //--------- update Assistance code -----------
-
-//                                rootRef.child("Users").orderByChild("code").equalTo(Bcode).addListenerForSingleValueEvent(new ValueEventListener() {
-//                                    @Override
-//                                    public void onDataChange(DataSnapshot dataSnapshot) {
-//                                        if (dataSnapshot.exists()) {
-//                                            Boolean role = dataSnapshot.getValue().toString().contains("Blind User");
-//                                            if (role.equals(true)) {
-//                                                final HashMap<String, Object> codes = new HashMap<>();
-//                                                codes.put("code"+i, Bcode);
-//                                                rootRef.child("Users").child(userId).child("code").addChildEventListener(new ChildEventListener() {
-//                                                    @Override
-//                                                    public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-//                                                        Toast.makeText(getContext(), "code added", Toast.LENGTH_SHORT).show();
-//                                                    }
-//
-//                                                    @Override
-//                                                    public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-//
-//                                                    }
-//
-//                                                    @Override
-//                                                    public void onChildRemoved(@NonNull DataSnapshot snapshot) {
-//
-//                                                    }
-//
-//                                                    @Override
-//                                                    public void onChildMoved(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
-//
-//                                                    }
-//
-//                                                    @Override
-//                                                    public void onCancelled(@NonNull DatabaseError error) {
-//
-//                                                    }
-//                                                });
-//                                                i++;
-//                                              //  users.setCode(Bcode);
-//                                              //  rootRef.child("Users").child(userId).updateChildren(code);
-//                                          //   rootRef.child("Users").child(userId).child("code").setValue(Bcode);
-//
-//                                            }
-//                                        }
-//                                        else {
-//                                            Toast.makeText(getContext(), "ERROR: Invalid Code! ", Toast.LENGTH_SHORT).show();
-//                                        }
-//                                    }
-//                                    @Override
-//                                    public void onCancelled(@NonNull DatabaseError error) {
-//                                    }
-//                                });
-
-                                    }else{
-                                        Toast.makeText(getContext(), "ERROR: Code Already Exists!", Toast.LENGTH_SHORT).show();
+                                        Button btn = errorDialog.findViewById(R.id.confirm_button);
+                                        btn.setPadding(10,10,10,10);
                                     }
-                                }else{
-                                    Toast.makeText(getContext(), "ERROR: Code Should Consists of 6 Digits!", Toast.LENGTH_SHORT).show();
-                                }
+                                } else if(Bcode.length() == 0){
+                                    rootRef.child("Users").child(userId).updateChildren(userName).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                        @Override
+                                        public void onComplete(@NonNull Task<Void> task) {
+                                            if (task.isSuccessful()) {
+                                                successDialog =  new SweetAlertDialog(getContext(), SweetAlertDialog.SUCCESS_TYPE);
+                                                successDialog.setTitleText("Success!");
+                                                successDialog.setContentText("Your profile has been updated!");
+                                                successDialog.setConfirmText("OK" );
+                                                successDialog.showConfirmButton(true);
+                                                successDialog.show();
 
+                                                Button btn = successDialog.findViewById(R.id.confirm_button);
+                                                btn.setPadding(10,10,10,10);
+
+                                            } else {
+                                                errorDialog =  new SweetAlertDialog(getContext(), SweetAlertDialog.ERROR_TYPE);
+                                                errorDialog.setTitleText("Error!");
+                                                errorDialog.setContentText("Profile has not been updated!");
+                                                errorDialog.setConfirmText("OK" );
+                                                errorDialog.showConfirmButton(true);
+                                                errorDialog.show();
+
+                                                Button btn = errorDialog.findViewById(R.id.confirm_button);
+                                                btn.setPadding(10,10,10,10);
+                                            }
+                                        }});
+                                }else{
+                                    errorDialog =  new SweetAlertDialog(getContext(), SweetAlertDialog.ERROR_TYPE);
+                                    errorDialog.setTitleText("Error!");
+                                    errorDialog.setContentText("Code should consists of 6 digits!");
+                                    errorDialog.setConfirmText("OK" );
+                                    errorDialog.showConfirmButton(true);
+                                    errorDialog.show();
+
+                                    Button btn = errorDialog.findViewById(R.id.confirm_button);
+                                    btn.setPadding(10,10,10,10);
+
+                                }
                             }
                             else{
-                                Toast.makeText(getContext(), "ERROR: User Name cannot be Empty!", Toast.LENGTH_SHORT).show();
+                                errorDialog =  new SweetAlertDialog(getContext(), SweetAlertDialog.ERROR_TYPE);
+                                errorDialog.setTitleText("Error!");
+                                errorDialog.setContentText("Username cannot be empty!");
+                                errorDialog.setConfirmText("OK" );
+                                errorDialog.showConfirmButton(true);
+                                errorDialog.show();
+
+                                Button btn = errorDialog.findViewById(R.id.confirm_button);
+                                btn.setPadding(10,10,10,10);
                             }
                         }}
-
-
-
                     @Override
                     public void onCancelled(DatabaseError databaseError) {
 
@@ -197,15 +188,15 @@ public class EditProfileFragment extends Fragment {
 
             }
         });
-
+        // end of update data code
 
         return view;
-    }
+
+    } // end onCreate view
 
 
-
+    // Upload code list
     private void uploadCodeList() {
-
         DatabaseReference rootRef = FirebaseDatabase.getInstance().getReference();
         rootRef.child("Users").orderByChild("role").equalTo("Blind User").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
@@ -213,30 +204,66 @@ public class EditProfileFragment extends Fragment {
                 if (dataSnapshot.exists()) {
                     Boolean Acode = dataSnapshot.getValue().toString().contains(String.valueOf(Bcode));
                     if (Acode.equals(true)) {
-                        codeList.add(Bcode.toString());
+                        codeList.add(Bcode);
                         rootRef.child("Users").child(userId).child("code").setValue(codeList).addOnCompleteListener(new OnCompleteListener<Void>() {
                             @Override
                             public void onComplete(@NonNull Task<Void> task) {
                                 if (task.isSuccessful()) {
-                                    Toast.makeText(getContext(), "Profile Updated Successfully!", Toast.LENGTH_SHORT).show();
+                                    successDialog =  new SweetAlertDialog(getContext(), SweetAlertDialog.SUCCESS_TYPE);
+                                    successDialog.setTitleText("Success!");
+                                    successDialog.setContentText("Your profile has been updated!");
+                                    successDialog.setConfirmText("OK" );
+                                    successDialog.showConfirmButton(true);
+                                    successDialog.show();
+
+                                    Button btn = successDialog.findViewById(R.id.confirm_button);
+                                    btn.setPadding(10,10,10,10);
+
                                 } else {
-                                    Toast.makeText(getContext(), "ERROR: Profile Didn't Update!", Toast.LENGTH_SHORT).show();
+                                    errorDialog =  new SweetAlertDialog(getContext(), SweetAlertDialog.ERROR_TYPE);
+                                    errorDialog.setTitleText("Error!");
+                                    errorDialog.setContentText("Profile has not been updated!");
+                                    errorDialog.setConfirmText("OK" );
+                                    errorDialog.showConfirmButton(true);
+                                    errorDialog.show();
+
+                                    Button btn = errorDialog.findViewById(R.id.confirm_button);
+                                    btn.setPadding(10,10,10,10);
+
                                 }
                             }});
                     } else {
-                        Toast.makeText(getContext(), "ERROR: Invalid Code! ", Toast.LENGTH_SHORT).show();
+                        errorDialog =  new SweetAlertDialog(getContext(), SweetAlertDialog.ERROR_TYPE);
+                        errorDialog.setTitleText("Error!");
+                        errorDialog.setContentText("You entered an invalid assistance code!");
+                        errorDialog.setConfirmText("OK" );
+                        errorDialog.showConfirmButton(true);
+                        errorDialog.show();
+
+                        Button btn = errorDialog.findViewById(R.id.confirm_button);
+                        btn.setPadding(10,10,10,10);
+
                     }
                 }else {
-                    Toast.makeText(getContext(), "ERROR: Doesn't Exists ", Toast.LENGTH_SHORT).show();
+                    errorDialog =  new SweetAlertDialog(getContext(), SweetAlertDialog.ERROR_TYPE);
+                    errorDialog.setTitleText("Error!");
+                    errorDialog.setContentText("User doesn't Exists");
+                    errorDialog.setConfirmText("OK" );
+                    errorDialog.showConfirmButton(true);
+                    errorDialog.show();
+
+                    Button btn = errorDialog.findViewById(R.id.confirm_button);
+                    btn.setPadding(10,10,10,10);
+
                 }}
             @Override
             public void onCancelled (@NonNull DatabaseError error){
             }
 
         });
+    } // end of upload code list code
 
-    }
-
+    //get user data function
     private void getUserData() {
         email.setText(userEmail);
         DatabaseReference reference = database.getReference("Users/"+userId);
@@ -245,44 +272,31 @@ public class EditProfileFragment extends Fragment {
             public void onDataChange(DataSnapshot dataSnapshot) {
                 Users users = dataSnapshot.getValue(Users.class);
                 userName = users.getUserName();
-                //      code = users.getCode();
                 name.setText(userName);
-//                    codeList.add(code.toString());
-
-                //       Acode.setText(code.toString());
-
             }
-
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
         });
-
 
         FirebaseDatabase.getInstance().getReference("Users").child(userId).child("code").addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
                 if(snapshot.exists()){
                     codeList.clear();
-
                     for(DataSnapshot ds:snapshot.getChildren()){
                         String codes = ds.getValue(String.class);
                         codeList.add(codes);
                     }
                     FirebaseDatabase.getInstance().getReference("Users").child(userId).child("code").setValue(codeList);
-
-
                 }
             }
-
-
             @Override
             public void onCancelled(@NonNull DatabaseError error) {
 
             }
         });
 
-    }
+    } // end of get user data data
 }

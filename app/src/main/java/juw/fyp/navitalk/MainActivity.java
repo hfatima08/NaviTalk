@@ -5,15 +5,10 @@ import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentTransaction;
-
-import android.content.Context;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.MenuItem;
-import android.widget.Toast;
-
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.ChildEventListener;
@@ -24,29 +19,35 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
 
-import static androidx.camera.core.CameraX.getContext;
 
 public class MainActivity extends AppCompatActivity {
 
-    private HomeFragment Home = new HomeFragment();
-    private SettingsFragment settings = new SettingsFragment();
     private BottomNavigationView menu;
     DatabaseReference ref;
-    String userId,userName;
+    String userId;
+
+    // Fragment Objects
+    private HomeFragment Home = new HomeFragment();
+    private SettingsFragment settings = new SettingsFragment();
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-       setFragment(Home);
+        // set default fragment as home fragment
+        setFragment(Home);
+
+        // Bottom menu
         menu=findViewById(R.id.menu_item);
         menu.setSelectedItemId(R.id.menu_home);
 
+        // get current logged-in user
         ref = FirebaseDatabase.getInstance().getReference().child("Users");
-       userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
 
-
+        // Check if blind user is calling with a delay of 4 secs
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -54,6 +55,7 @@ public class MainActivity extends AppCompatActivity {
             }
         }, 4000);
 
+        // Assign fragments on bottom menu
         menu.setOnNavigationItemSelectedListener(new BottomNavigationView.OnNavigationItemSelectedListener() {
             @Override
             public boolean onNavigationItemSelected(@NonNull MenuItem item) {
@@ -81,8 +83,8 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    // Check if Blind user is calling and open call connecting screen
     public void ReceiveCall() {
-
         ref.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -93,12 +95,10 @@ public class MainActivity extends AppCompatActivity {
                         @Override
                         public void onChildAdded(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
                             String Bid = snapshot.getKey();
-
                             Intent intent = new Intent(getApplicationContext(), ConnectingActivity2.class);
                             intent.putExtra("BId", Bid);
                             startActivity(intent);
                         }
-
 
                         @Override
                         public void onChildChanged(@NonNull DataSnapshot snapshot, @Nullable String previousChildName) {
@@ -120,7 +120,6 @@ public class MainActivity extends AppCompatActivity {
 
                         }
                     });
-                    //end
                 }
             }
 
@@ -131,6 +130,7 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    // Fragment Transaction function
     private void setFragment(Fragment fragment) {
         FragmentTransaction ft = getSupportFragmentManager().beginTransaction();
         ft.replace(R.id.main_frame , fragment);

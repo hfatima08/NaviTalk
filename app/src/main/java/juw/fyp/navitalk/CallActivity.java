@@ -2,10 +2,8 @@ package juw.fyp.navitalk;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.Manifest;
 import android.content.Intent;
-import android.media.MediaPlayer;
 import android.opengl.GLSurfaceView;
 import android.os.Bundle;
 import android.speech.tts.TextToSpeech;
@@ -18,10 +16,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.Task;
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -34,12 +28,7 @@ import com.opentok.android.PublisherKit;
 import com.opentok.android.Session;
 import com.opentok.android.Stream;
 import com.opentok.android.Subscriber;
-
-import org.checkerframework.checker.units.qual.C;
-
 import java.util.Locale;
-
-import juw.fyp.navitalk.detection.CameraActivity;
 import juw.fyp.navitalk.detection.DetectorActivity;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
@@ -64,7 +53,6 @@ public class CallActivity extends AppCompatActivity
     Publisher publisher;
     Subscriber subscriber;
     SwipeListener swipeListener;
-    Intent intent;
     TextToSpeech t1;
     FrameLayout frameLayout;
     LinearLayout progess;
@@ -73,21 +61,22 @@ public class CallActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_call);
 
-     //   userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        // Get data
         ref = FirebaseDatabase.getInstance().getReference().child("Users");
         volId = getIntent().getStringExtra("volId");
         userId =  getIntent().getStringExtra("uid");
+
+        // Resource ID
         endCall= findViewById(R.id.endCall);
         mic = findViewById(R.id.micBtn);
         name = findViewById(R.id.name);
         frameLayout = findViewById(R.id.frameLayout);
         progess = findViewById(R.id.progress);
 
-
+        // Request mic and camera permission
         requestPermission();
 
-
-        //Assigning the volunteer's name who the blind has called
+        // Assigning the volunteer's name who the blind has called
         DatabaseReference reference = FirebaseDatabase.getInstance().getReference("Users/"+volId+"/userName");
         reference.addValueEventListener(new ValueEventListener() {
             @Override
@@ -101,7 +90,7 @@ public class CallActivity extends AppCompatActivity
             }
         });
 
-        //end call button code
+        // End call button code
         endCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -109,10 +98,11 @@ public class CallActivity extends AppCompatActivity
             }
         });
 
+        // Initialize swipe gesture on layout
         swipeListener = new SwipeListener(frameLayout);
 
 
-        //speech to endcall
+        // Speech to endcall
         t1=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -123,7 +113,7 @@ public class CallActivity extends AppCompatActivity
             }
         });
 
-        //mute and un-mute mic code
+        // Mute and un-mute mic code
         mic.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -140,11 +130,9 @@ public class CallActivity extends AppCompatActivity
             }
         });
 
-
-
     }//end of onCreate()
 
-    //permission of camera and audio
+    // Permission of camera and audio
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -153,17 +141,15 @@ public class CallActivity extends AppCompatActivity
 
     }
 
+    // After permission granted start video call
     @AfterPermissionGranted(RC_VIDEO_APP_PERM)
     private void requestPermission(){
         String[] perms = {Manifest.permission.INTERNET,Manifest.permission.CAMERA,Manifest.permission.RECORD_AUDIO};
-
         if(EasyPermissions.hasPermissions(this,perms)){
             container1 = findViewById(R.id.cont1);
             container2 = findViewById(R.id.cont2);
-
             session =  new Session.Builder(this,API_KEY,SESSION_ID).build();
             session.setSessionListener(CallActivity.this);
-
             session.connect(TOKEN);
         }
         else{
@@ -241,7 +227,7 @@ public class CallActivity extends AppCompatActivity
 
     }
 
-//swipe gesture
+    // Swipe gesture code
     private class SwipeListener implements View.OnTouchListener{
         GestureDetector gestureDetector;
 
@@ -263,10 +249,11 @@ public class CallActivity extends AppCompatActivity
                         if(Math.abs(xDiff) > Math.abs(yDiff)){
                             if(Math.abs(xDiff) > threshold && Math.abs(velocityX) > velocity_threshold){
                                 if(xDiff>0){
+                                    // Swipe Right
                                     cancelCall();
                                 }
                                 else{
-//                                    textView.setText("swiped left");
+                                    // Swipe Left
                                     t1.speak("when you want to end your call,Swipe right.",TextToSpeech.QUEUE_ADD, null);
                                 }
                                 return true;
@@ -281,7 +268,6 @@ public class CallActivity extends AppCompatActivity
             };
 
             gestureDetector = new GestureDetector(listener);
-
             view.setOnTouchListener(this);
         }
 
@@ -292,13 +278,11 @@ public class CallActivity extends AppCompatActivity
 
     }
 
-    //end call code
+    // End call code
     private void cancelCall() {
         ref.child(volId).child("Ringing").removeValue();
         ref.child(userId).child("Calling").removeValue();
-
         session.unpublish(publisher);
-
         startActivity(new Intent(getApplicationContext(), DetectorActivity.class));
         finish();
     }

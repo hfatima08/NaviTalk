@@ -1,10 +1,7 @@
 package juw.fyp.navitalk;
 
-
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.speech.RecognizerIntent;
@@ -17,7 +14,6 @@ import android.view.animation.TranslateAnimation;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import java.util.ArrayList;
 import java.util.Locale;
 
 public class RoleScreen extends AppCompatActivity implements View.OnClickListener {
@@ -28,28 +24,28 @@ public class RoleScreen extends AppCompatActivity implements View.OnClickListene
     TextToSpeech t1;
     Intent intent;
 
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_role_screen);
 
+        // Resource Id's
         img = findViewById(R.id.img);
         vol = findViewById(R.id.btn_vol);
         blind = findViewById(R.id.btn_blind);
         linearLayout = findViewById(R.id.linearlayout);
 
-
+        // OnClick Listeners of buttons
         vol.setOnClickListener(this);
         blind.setOnClickListener(this);
 
-
-
-
+        // Image animation function call
         startAnimation();
 
+        // Initialize swipe gesture on layout
         swipeListener = new SwipeListener(linearLayout);
 
+        // Text to Speech code
         t1 = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -71,14 +67,14 @@ public class RoleScreen extends AppCompatActivity implements View.OnClickListene
 
     }//end of onCreate()
 
-    //BackButton Code
+    // Back button code
     @Override
     public void onBackPressed()
     {
         moveTaskToBack(true);
     }
 
-    //stop voice when activity is paused
+    // Stop voice when activity is paused
     public void onPause(){
         if(t1 !=null){
             t1.stop();
@@ -121,12 +117,12 @@ public class RoleScreen extends AppCompatActivity implements View.OnClickListene
                         if (Math.abs(xDiff) > Math.abs(yDiff)) {
                             if (Math.abs(xDiff) > threshold && Math.abs(velocityX) > velocity_threshold) {
                                 if (xDiff > 0) {
-                                    //textView.setText("swiped right");
+                                    // Swipe Right
                                     Intent intent1 = new Intent(getApplicationContext(), LoginScreen.class);
                                     intent1.putExtra("Role", "blind");
                                     startActivity(intent1);
                                 } else {
-                                    //     textView.setText("swiped left");
+                                    // Swipe Left
                                     t1.speak("If you want to login as a blind person swipe right", TextToSpeech.QUEUE_FLUSH, null);
 
                                 }
@@ -140,9 +136,7 @@ public class RoleScreen extends AppCompatActivity implements View.OnClickListene
                     return false;
                 }
             };
-
             gestureDetector = new GestureDetector(listener);
-
             view.setOnTouchListener(this);
         }
 
@@ -151,9 +145,9 @@ public class RoleScreen extends AppCompatActivity implements View.OnClickListene
             return gestureDetector.onTouchEvent(event);
         }
 
-    }
+    } // end of swipe gesture code
 
-    //Image Animation
+    //Image Animation Function
     private void startAnimation() {
         Animation zoomin =new TranslateAnimation(1, 1, 0, -50);
         zoomin.setDuration(1000);
@@ -210,7 +204,7 @@ public class RoleScreen extends AppCompatActivity implements View.OnClickListene
             }
 
         });
-    }
+    } // end of image animation function
 
 
     }

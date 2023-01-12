@@ -2,7 +2,6 @@ package juw.fyp.navitalk;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.Manifest;
 import android.content.Intent;
 import android.opengl.GLSurfaceView;
@@ -15,8 +14,6 @@ import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
-import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
@@ -29,11 +26,9 @@ import com.opentok.android.PublisherKit;
 import com.opentok.android.Session;
 import com.opentok.android.Stream;
 import com.opentok.android.Subscriber;
-
-import juw.fyp.navitalk.detection.DetectorActivity;
-import juw.fyp.navitalk.models.Users;
 import pub.devrel.easypermissions.AfterPermissionGranted;
 import pub.devrel.easypermissions.EasyPermissions;
+
 
 public class CallActivity2 extends AppCompatActivity  implements Session.SessionListener,
         PublisherKit.PublisherListener {
@@ -54,22 +49,24 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
     Subscriber subscriber;
     TextView name;
     LinearLayout progess;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_call2);
 
-      //  userId = FirebaseAuth.getInstance().getCurrentUser().getUid();
+        // Get data
         ref = FirebaseDatabase.getInstance().getReference().child("Users");
         BId = getIntent().getStringExtra("BId");
         userId =  getIntent().getStringExtra("uid");
 
+        // Resource ID
         endCall = findViewById(R.id.endCall);
         name = findViewById(R.id.bname);
         mic = findViewById(R.id.micBtn);
         progess = findViewById(R.id.progress);
 
-        //assigning callers name on call screen
+        // Assigning callers name on call screen
         ref.child(BId).child("userName").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -82,7 +79,7 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
             }
         });
 
-        //end call button code
+        // End call button code
         endCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -93,10 +90,10 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
 
                 startActivity(new Intent(getApplicationContext(), MainActivity.class));
                 finish();
-
-                               }
+            }
         });
 
+        // Request mic and camera permission
         requestPermission();
 
         //mic mute and un-mute code
@@ -106,21 +103,17 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
                 if (publisher != null) {
                 isAudio = !isAudio;
                 if(isAudio){
-
                     mic.setImageResource(R.drawable.btn_unmute_normal);
                     publisher.setPublishAudio(true);
-
                 }else{
-
                     mic.setImageResource(R.drawable.btn_mute_pressed);
                     publisher.setPublishAudio(false);
-
                 }
             }
             }
         });
 
-        //end call if blind user ends call
+        // End call if blind user ends call
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -131,10 +124,8 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
                             endCall.setClickable(true);
                         }
                     }
-
                     @Override
                     public void onCancelled(@NonNull DatabaseError error) {
-
                     }
                 });
             }
@@ -142,13 +133,11 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
 
     }
 
-//permissions
+// Permissions
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-
         EasyPermissions.onRequestPermissionsResult(requestCode,permissions,grantResults,CallActivity2.this);
-
     }
 
     @AfterPermissionGranted(RC_VIDEO_APP_PERM)
@@ -158,10 +147,8 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
         if(EasyPermissions.hasPermissions(this,perms)){
             container1 = findViewById(R.id.cont1);
             container2 = findViewById(R.id.cont2);
-
             session =  new Session.Builder(this,API_KEY,SESSION_ID).build();
             session.setSessionListener(CallActivity2.this);
-
             session.connect(TOKEN);
         }
         else{
@@ -184,7 +171,7 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
 
     }
 
-    ///stream connection
+    // Stream connection
     @Override
     public void onConnected(Session session) {
         Log.i(LOG_TAG,"Session Connected");
@@ -216,7 +203,6 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
         if(subscriber == null){
             subscriber = new Subscriber.Builder(this,stream).build();;
             session.subscribe(subscriber);
-
             container1.addView(subscriber.getView());
         }
     }
@@ -237,4 +223,5 @@ public class CallActivity2 extends AppCompatActivity  implements Session.Session
     public void onError(Session session, OpentokError opentokError) {
 
     }
+
 }

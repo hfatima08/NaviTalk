@@ -1,19 +1,3 @@
-/*
- * Copyright 2019 The TensorFlow Authors. All Rights Reserved.
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *       http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
-
 package juw.fyp.navitalk.detection;
 
 import android.graphics.Bitmap;
@@ -32,7 +16,6 @@ import android.speech.tts.TextToSpeech;
 import android.util.Size;
 import android.util.TypedValue;
 import android.widget.Toast;
-
 import juw.fyp.navitalk.R;
 import juw.fyp.navitalk.detection.customview.OverlayView;
 import juw.fyp.navitalk.detection.customview.OverlayView.DrawCallback;
@@ -42,15 +25,13 @@ import juw.fyp.navitalk.detection.env.Logger;
 import juw.fyp.navitalk.detection.tflite.Detector;
 import juw.fyp.navitalk.detection.tflite.TFLiteObjectDetectionAPIModel;
 import juw.fyp.navitalk.detection.tracking.MultiBoxTracker;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * An activity that uses a TensorFlowMultiBoxDetector and ObjectTracker to detect and then track
- * objects.
- */
+//
+//An activity that uses a TensorFlowMultiBoxDetector and ObjectTracker to detect and then track objects.
+//
 public class DetectorActivity<str> extends CameraActivity implements OnImageAvailableListener {
   private static final Logger LOGGER = new Logger();
 
@@ -140,9 +121,6 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
           @Override
           public void drawCallback(final Canvas canvas) {
             tracker.draw(canvas);
-            if (isDebug()) {
-          //    tracker.drawDebug(canvas);
-            }
           }
         });
 
@@ -165,9 +143,7 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
     LOGGER.i("Preparing image " + currTimestamp + " for detection in bg thread.");
 
     rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
-
-      rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
-
+    rgbFrameBitmap.setPixels(getRgbBytes(), 0, previewWidth, 0, 0, previewWidth, previewHeight);
 
       mappedRecognitions.clear();
 
@@ -192,7 +168,6 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
            LOGGER.i("Running detection on image " + currTimestamp);
             final long startTime = SystemClock.uptimeMillis();
             final List<Detector.Recognition> results = detector.recognizeImage(croppedBitmap);
-          //  String results = detector.recognizeImage(croppedBitmap);
             lastProcessingTimeMs = SystemClock.uptimeMillis() - startTime;
             cropCopyBitmap = Bitmap.createBitmap(croppedBitmap);
             final Canvas canvas = new Canvas(cropCopyBitmap);
@@ -208,33 +183,28 @@ public class DetectorActivity<str> extends CameraActivity implements OnImageAvai
                 break;
             }
 
-
-
            for (final Detector.Recognition result : results) {
               final RectF location = result.getLocation();
               if (location != null && result.getConfidence() >= minimumConfidence && result.getTitle().equals(obj)) {
                   float x1 = location.right;
                   float x2 = location.left;
-                  float mid_x = location.centerX();
+//                  float mid_x = location.centerX();
                distance =  getObjDistance(x1,x2);
                 canvas.drawRect(location, paint);
                 cropToFrameTransform.mapRect(location);
                 result.setLocation(location);
                 mappedRecognitions.add(result);
                   computingDetection = true;
-            //     t1.speak(obj + "detected", TextToSpeech.QUEUE_ADD, null);
+                  detected=true;
                   break;
+              }else if(detected==true){
+                  t1.speak(obj + "misplaced", TextToSpeech.QUEUE_ADD, null);
               }
             }
 
-         tracker.trackResults(mappedRecognitions, currTimestamp);
+            tracker.trackResults(mappedRecognitions, currTimestamp);
             trackingOverlay.postInvalidate();
             computingDetection = false;
-
-//            if(obj.isEmpty()) {
-//                t1.speak(obj + "detected", TextToSpeech.QUEUE_ADD, null);
-//            }
-
           }
         });
 

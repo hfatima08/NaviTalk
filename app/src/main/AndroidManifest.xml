@@ -22,10 +22,6 @@
         <activity android:name=".ConnectingActivity2" />
         <activity android:name=".CallActivity" />
         <activity android:name=".ConnectingActivity" />
-        <activity
-            android:name=".CodeActivity"
-            android:exported="true" />
-        <activity android:name=".CameraScreen" />
         <activity android:name=".RoleScreen" />
         <activity android:name=".LoginScreen" />
         <activity

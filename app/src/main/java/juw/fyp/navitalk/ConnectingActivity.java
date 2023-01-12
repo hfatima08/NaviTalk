@@ -1,11 +1,8 @@
 package juw.fyp.navitalk;
 
 import androidx.annotation.NonNull;
-import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
-
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -14,42 +11,30 @@ import android.speech.tts.TextToSpeech;
 import android.view.GestureDetector;
 import android.view.MotionEvent;
 import android.view.View;
-import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
-
 import com.google.android.gms.tasks.OnCompleteListener;
-import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.Query;
 import com.google.firebase.database.ValueEventListener;
-
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Locale;
-
-import juw.fyp.navitalk.detection.CameraActivity;
-import juw.fyp.navitalk.detection.CameraConnectionFragment;
 import juw.fyp.navitalk.detection.DetectorActivity;
-import juw.fyp.navitalk.detection.tflite.Detector;
+
 
 public class ConnectingActivity extends AppCompatActivity {
-
     FirebaseAuth auth;
     FirebaseDatabase database;
     DatabaseReference reference;
-    String userName,checker=" ",uid;
+    String checker=" ",volid=" ",uid;
     ImageView endCall,acceptCall;
     MediaPlayer mediaPlayer;
-    String volid=" ";
     LinearLayout linearLayout;
     SwipeListener swipeListener;
     Intent intent;
@@ -61,23 +46,28 @@ public class ConnectingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_connecting);
 
+        // Resource ID
         endCall = findViewById(R.id.endCall);
         acceptCall = findViewById(R.id.startCall);
         linearLayout = findViewById(R.id.layout);
         name = findViewById(R.id.volname);
 
+        // Firebase Instances
         auth = FirebaseAuth.getInstance();
         database = FirebaseDatabase.getInstance();
-        volid = getIntent().getStringExtra("vol");
         uid = auth.getUid();
-
         reference = FirebaseDatabase.getInstance().getReference("Users");
 
+        // Get volunteer id from bundle
+        volid = getIntent().getStringExtra("vol");
+
+        // Play ringtone
         mediaPlayer = MediaPlayer.create(this,R.raw.ringtone);
 
+        // Initialize swipe gesture on layout
         swipeListener = new SwipeListener(linearLayout);
 
-        //Assigning the volunteer's name who the blind has called
+        // Assigning the volunteer's name who the blind has called
         reference.child(volid).child("userName").addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
@@ -90,7 +80,7 @@ public class ConnectingActivity extends AppCompatActivity {
             }
         });
 
-        //speech to endcall
+        // Speech to endcall
         t1=new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
@@ -101,11 +91,11 @@ public class ConnectingActivity extends AppCompatActivity {
             }
         });
 
-        //calling google intent for speech
+        // calling google intent for speech
         intent = new Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
         intent.putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM);
 
-        //endcall button
+        // endcall button
         endCall.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -122,7 +112,7 @@ public class ConnectingActivity extends AppCompatActivity {
             }
         }, 1000);
 
-    //end call if the volunteer end's call
+    // end call if the volunteer end's call
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
@@ -144,7 +134,7 @@ public class ConnectingActivity extends AppCompatActivity {
 
     }// end of onCreate()
 
-    //Swipe gesture
+    // Swipe gesture
     private class SwipeListener implements View.OnTouchListener{
         GestureDetector gestureDetector;
 
@@ -166,10 +156,11 @@ public class ConnectingActivity extends AppCompatActivity {
                         if(Math.abs(xDiff) > Math.abs(yDiff)){
                             if(Math.abs(xDiff) > threshold && Math.abs(velocityX) > velocity_threshold){
                                 if(xDiff>0){
+                                    // Swipe Right
                                     cancelCall();
                                 }
                                 else{
-//                                    textView.setText("swiped left");
+                                    // Swipe Left
                                     t1.speak("when you want to end your call, swipe right.",TextToSpeech.QUEUE_ADD, null);
                                 }
                                 return true;
@@ -182,9 +173,7 @@ public class ConnectingActivity extends AppCompatActivity {
                     return false;
                 }
             };
-
             gestureDetector = new GestureDetector(listener);
-
             view.setOnTouchListener(this);
         }
 
@@ -192,13 +181,11 @@ public class ConnectingActivity extends AppCompatActivity {
         public boolean onTouch(View v, MotionEvent event) {
             return gestureDetector.onTouchEvent(event);
         }
-
-    }
+    } // end of swipe gesture code
 
     //Connect Call
     public void connectCall(){
       mediaPlayer.start();
-
       reference.child(volid).addListenerForSingleValueEvent(new ValueEventListener() {
           @Override
           public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -224,14 +211,12 @@ public class ConnectingActivity extends AppCompatActivity {
                           });
               }
           }
-
           @Override
           public void onCancelled(@NonNull DatabaseError error) {
-
           }
       });
 
-      //Go To Call Activity When volunteer picks up
+      // Go To Call Activity When volunteer picks up
       reference.addValueEventListener(new ValueEventListener() {
           @Override
           public void onDataChange(@NonNull DataSnapshot snapshot) {
@@ -245,20 +230,17 @@ public class ConnectingActivity extends AppCompatActivity {
                   }
               }
           }
-
           @Override
           public void onCancelled(@NonNull DatabaseError error) {
-
           }
       });
   }
 
-//EndCall method
+// End Call method
     private void cancelCall() {
         mediaPlayer.stop();
         reference.child(volid).child("Ringing").removeValue();
         reference.child(uid).child("Calling").removeValue();
-
         startActivity(new Intent(getApplicationContext(), DetectorActivity.class));
         finish();
    }
